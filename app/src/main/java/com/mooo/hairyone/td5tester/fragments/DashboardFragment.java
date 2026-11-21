@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.mooo.hairyone.td5tester.Conversions;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
+import com.mooo.hairyone.td5tester.RunningStats;
 import com.mooo.hairyone.td5tester.Settings;
 import com.mooo.hairyone.td5tester.events.ConnectedEvent;
 import com.mooo.hairyone.td5tester.events.DashboardEvent;
@@ -36,6 +37,10 @@ public class DashboardFragment extends BaseFragment {
     private float ambientPressureKpa = Float.NaN;
     private float manifoldPressureKpa = Float.NaN;
 
+    // Mean battery voltage since the connection, shown under the reading.
+    // Process-wide, so a split-screen rebuild does not start it over.
+    private static final RunningStats battery = new RunningStats();
+
     public DashboardFragment() { /* Required empty public constructor */ }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -43,7 +48,13 @@ public class DashboardFragment extends BaseFragment {
         float value = (float) event.value;
         switch (event.data_type) {
             case RPM:             gRPM.setValue(value); break;
-            case BATTERY_VOLTAGE: gVOLT.setValue(value); break;
+            case BATTERY_VOLTAGE:
+                gVOLT.setValue(value);
+                battery.add(value);
+                if (!battery.isEmpty()) {
+                    gVOLT.setFootnote(String.format("moy. %.1f", battery.mean()));
+                }
+                break;
             case COOLANT_TEMP:
                 gCOOLANT.setValue(value);
                 updateWarmup(value);
@@ -74,6 +85,8 @@ public class DashboardFragment extends BaseFragment {
         gRPM.resetPeak();
         gTURBO.resetPeak();
         gCOOLANT.resetPeak();
+        battery.reset();
+        gVOLT.setFootnote(null);
         warmAnnounced = false;
     }
 
@@ -137,6 +150,12 @@ public class DashboardFragment extends BaseFragment {
         gCOOLANT = view.findViewById(R.id.gCOOLANT);
         gAIRFLOW = view.findViewById(R.id.gAIRFLOW);
         tvWarmup = view.findViewById(R.id.tvWarmup);
+
+        if (!battery.isEmpty()) gVOLT.setFootnote(String.format("moy. %.1f", battery.mean()));
+
+        // Read in turn with the other slow values, not on every pass.
+        gCOOLANT.setStaleAfter(GaugeView.STALE_SLOW_MS);
+        gVOLT.setStaleAfter(GaugeView.STALE_SLOW_MS);
 
         gRPM.trackPeak();
         gTURBO.trackPeak();

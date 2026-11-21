@@ -46,9 +46,9 @@ public final class Settings {
     static {
         add("rpm_warn", ENGINE, "Régime — seuil orange", "tr/min", 4200);
         add("rpm_alert", ENGINE, "Régime — seuil rouge", "tr/min", 4800);
-        add("coolant_cold", ENGINE, "Liquide — encore froid sous", "°C", 70);
-        add("coolant_warn", ENGINE, "Liquide — seuil orange", "°C", 96);
-        add("coolant_alert", ENGINE, "Liquide — seuil rouge", "°C", 105);
+        add("coolant_cold", ENGINE, "T° moteur — encore froid sous", "°C", 70);
+        add("coolant_warn", ENGINE, "T° moteur — seuil orange", "°C", 96);
+        add("coolant_alert", ENGINE, "T° moteur — seuil rouge", "°C", 105);
         add("fuel_warn", ENGINE, "Gasoil — seuil orange", "°C", 80);
         add("fuel_alert", ENGINE, "Gasoil — seuil rouge", "°C", 95);
 
@@ -73,6 +73,7 @@ public final class Settings {
         add("track_warn_low", PEDAL, "Voie — orange sous", "V", 0.7f);
         add("track_warn_high", PEDAL, "Voie — orange au-dessus de", "V", 4.3f);
         add("track_alert_high", PEDAL, "Voie — rouge au-dessus de", "V", 4.6f);
+        add("pedal_full_mg", PEDAL, "Pédale au plancher — demande Expert", "mg", 50);
 
         add("warm_c", COND, "Moteur considéré chaud à", "°C", 80);
         add("cold_c", COND, "Moteur considéré froid sous", "°C", 40);

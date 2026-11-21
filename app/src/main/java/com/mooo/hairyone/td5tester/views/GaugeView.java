@@ -54,17 +54,27 @@ public class GaugeView extends View {
     private boolean hasValue = false;
     private boolean hero = false;
     private String secondary = null;
+    // A small line under the caption, styled like the session peak.
+    private String footnote = null;
 
     private ValueAnimator animator;
 
     // A failed ECU read leaves the last value on screen, which would otherwise
     // be indistinguishable from a live one.
     private static final long STALE_AFTER_MS = 2500;
+    /** For readings polled in turn rather than on every pass. */
+    public static final long STALE_SLOW_MS = 8000;
+    /** For ambient pressure, which is only read now and then. */
+    public static final long STALE_RARE_MS = 60000;
+    private long staleAfterMs = STALE_AFTER_MS;
     private boolean stale = false;
     private final Runnable goStale = () -> { stale = true; invalidate(); };
 
     private boolean trackPeak = false;
     private float peak = Float.NEGATIVE_INFINITY;
+    // Session peaks by gauge id, kept outside the view so they survive the
+    // screen being rebuilt when the radio switches to split screen.
+    private static final java.util.Map<Integer, Float> PEAKS = new java.util.HashMap<>();
 
     private String infoTitle = null;
     private String infoBody = null;
@@ -149,9 +159,14 @@ public class GaugeView extends View {
         invalidate();
     }
 
+    /** How long without a reading before the gauge greys out as lost. */
+    public void setStaleAfter(long ms) { this.staleAfterMs = ms; }
+
     /** Keeps the highest reading of the session, shown under the caption. */
     public void trackPeak() {
         this.trackPeak = true;
+        Float saved = PEAKS.get(getId());
+        if (saved != null) peak = saved;
     }
 
     /** Attaches the note shown when the gauge is tapped, and marks it tappable. */
@@ -176,6 +191,7 @@ public class GaugeView extends View {
 
     public void resetPeak() {
         peak = Float.NEGATIVE_INFINITY;
+        PEAKS.remove(getId());
         invalidate();
     }
 
@@ -183,8 +199,11 @@ public class GaugeView extends View {
         this.targetValue = value;
         stale = false;
         removeCallbacks(goStale);
-        postDelayed(goStale, STALE_AFTER_MS);
-        if (trackPeak && value > peak) peak = value;
+        postDelayed(goStale, staleAfterMs);
+        if (trackPeak && value > peak) {
+            peak = value;
+            PEAKS.put(getId(), peak);
+        }
         if (!hasValue) {
             hasValue = true;
             shownValue = value;
@@ -216,6 +235,9 @@ public class GaugeView extends View {
 
     /** A second line under the main reading, used by the hero gauge for speed. */
     public void setSecondary(String secondary) { this.secondary = secondary; invalidate(); }
+
+    /** A small grey line under the caption, the same as the "max" line of the other gauges. */
+    public void setFootnote(String footnote) { this.footnote = footnote; invalidate(); }
 
     public int getState() {
         if (!hasValue) return STATE_NORMAL;
@@ -312,7 +334,13 @@ public class GaugeView extends View {
             canvas.drawText(secondary, cx, cy + radius * 0.66f, unitPaint);
         }
 
-        boolean showPeak = trackPeak && peak > Float.NEGATIVE_INFINITY && hasValue;
+        String footText = null;
+        if (trackPeak && peak > Float.NEGATIVE_INFINITY && hasValue) {
+            footText = String.format("max %." + decimals + "f", peak);
+        } else if (footnote != null && hasValue) {
+            footText = footnote;
+        }
+        boolean showPeak = footText != null;
         if (caption != null && !caption.isEmpty()) {
             captionPaint.setColor(ContextCompat.getColor(getContext(),
                     stale ? R.color.labelTertiary : R.color.labelSecondary));
@@ -328,8 +356,7 @@ public class GaugeView extends View {
                 captionPaint.setTextSize(captionSize * 0.82f);
                 captionPaint.setLetterSpacing(0.02f);
                 captionPaint.setColor(ContextCompat.getColor(getContext(), R.color.labelTertiary));
-                canvas.drawText(String.format("max %." + decimals + "f", peak),
-                        cx, baseline + captionSize * 1.35f, captionPaint);
+                canvas.drawText(footText, cx, baseline + captionSize * 1.35f, captionPaint);
             }
         }
 

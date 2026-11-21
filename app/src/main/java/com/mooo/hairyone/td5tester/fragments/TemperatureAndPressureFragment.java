@@ -30,9 +30,13 @@ public class TemperatureAndPressureFragment extends BaseFragment {
             case ACC_TRACK_1:       gACC_TRACK_1.setValue(value); break;
             case ACC_TRACK_2:       gACC_TRACK_2.setValue(value); break;
             case ACC_TRACK_3:       gACC_TRACK_3.setValue(value); break;
-            case ACC_SUPPLY:
-                gACC_SUPPLY.setValue((float) Conversions.pedalPercent(value));
+            // The supply channel holds still on the vehicle; the driver demand
+            // from the fuelling frame is what follows the pedal.
+            case DRIVER_DEMAND: {
+                double percent = Conversions.pedalPercentFromDemand(value, s("pedal_full_mg"));
+                if (!Conversions.isNoReading(percent)) gACC_SUPPLY.setValue((float) percent);
                 break;
+            }
             case AMBIENT_PRESSURE:  gAMBIENT_PRESSURE.setValue(value); break;
             case FUEL_TEMP:         gFUEL_TEMP.setValue(value); break;
             case INLET_TEMP:        gINLET_TEMP.setValue(value); break;
@@ -78,6 +82,12 @@ public class TemperatureAndPressureFragment extends BaseFragment {
         gEXTERNAL_TEMP = view.findViewById(R.id.gEXTERNAL_TEMP);
 
         applyBands();
+
+        // Temperatures are read in turn; ambient pressure only now and then.
+        gFUEL_TEMP.setStaleAfter(GaugeView.STALE_SLOW_MS);
+        gINLET_TEMP.setStaleAfter(GaugeView.STALE_SLOW_MS);
+        gEXTERNAL_TEMP.setStaleAfter(GaugeView.STALE_SLOW_MS);
+        gAMBIENT_PRESSURE.setStaleAfter(GaugeView.STALE_RARE_MS);
 
         gACC_TRACK_1.setInfo(getString(R.string.t_track), getString(R.string.i_track));
         gACC_TRACK_2.setInfo(getString(R.string.t_track), getString(R.string.i_track));

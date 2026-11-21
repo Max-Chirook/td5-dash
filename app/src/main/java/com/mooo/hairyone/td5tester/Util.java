@@ -37,8 +37,25 @@ public  class Util {
         return (short) (hi_byte << 8 | lo_byte & 0xFF);
     }
 
+    // The connection journal lives here rather than in a screen, so it is
+    // still there after Android rebuilds the screens.
+    private static final java.util.ArrayList<String> journal = new java.util.ArrayList<>();
+
     public static void log_msg(String msg) {
+        if (msg == null || msg.isEmpty()) return;
+        String line = new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.FRANCE)
+                .format(new java.util.Date()) + "  " + msg;
+        synchronized (journal) {
+            journal.add(line);
+            while (journal.size() > Consts.MAX_INFO_LINES) journal.remove(0);
+        }
         EventBus.getDefault().post(new MessageEvent(msg));
+    }
+
+    public static java.util.List<String> journal() {
+        synchronized (journal) {
+            return new java.util.ArrayList<>(journal);
+        }
     }
 
 

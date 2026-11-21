@@ -91,6 +91,7 @@ public class InjectorFragment extends BaseFragment {
         // Ideal is -4 to +4 warm at idle, tolerance runs to -15 / +15.
         for (GaugeView gauge : balance) {
             gauge.setOrigin(0f);
+            gauge.setStaleAfter(GaugeView.STALE_SLOW_MS);
             gauge.setBands(s("inj_alert_low"), s("inj_warn_low"), s("inj_warn_high"), s("inj_alert_high"));
             gauge.setInfo(getString(R.string.t_inj), getString(R.string.i_inj));
         }

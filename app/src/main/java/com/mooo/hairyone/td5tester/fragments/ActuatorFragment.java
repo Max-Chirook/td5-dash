@@ -7,15 +7,14 @@ import android.widget.TextView;
 
 import androidx.gridlayout.widget.GridLayout;
 
+import com.mooo.hairyone.td5tester.EcuSession;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
 import com.mooo.hairyone.td5tester.Requests;
 import com.mooo.hairyone.td5tester.events.ConnectedEvent;
 import com.mooo.hairyone.td5tester.events.NotConnectedEvent;
-import com.mooo.hairyone.td5tester.events.RunActuatorEvent;
 
 import org.apache.log4j.Logger;
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -79,8 +78,16 @@ public class ActuatorFragment extends BaseFragment {
                 .setMessage(warning)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.act_run,
-                        (d, w) -> EventBus.getDefault().post(new RunActuatorEvent(pid, label)))
+                        (d, w) -> EcuSession.get(requireContext()).runActuator(pid, label))
                 .show();
+    }
+
+    @Override public void onStart() {
+        super.onStart();
+        // The link outlives this screen: ask it rather than wait for an event
+        // that may have been sent before the screen existed.
+        connected = EcuSession.get(requireContext()).isConnected();
+        updateAvailability();
     }
 
     @Override protected int getFragmentLayout() { return R.layout.actuator_fragment; }
@@ -111,6 +118,7 @@ public class ActuatorFragment extends BaseFragment {
             lp.setMargins(margin, margin, margin, margin);
             grid.addView(button, lp);
         }
+        connected = EcuSession.get(requireContext()).isConnected();
         updateAvailability();
     }
 }

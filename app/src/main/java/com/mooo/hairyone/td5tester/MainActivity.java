@@ -1,5 +1,6 @@
 package com.mooo.hairyone.td5tester;
-import android.content.res.Configuration;
+import android.content.Intent;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,7 @@ import com.mooo.hairyone.td5tester.fragments.ConnectFragment;
 import com.mooo.hairyone.td5tester.fragments.SettingsFragment;
 import com.mooo.hairyone.td5tester.fragments.DashboardFragment;
 import com.mooo.hairyone.td5tester.fragments.FuelDemandFragment;
+import com.mooo.hairyone.td5tester.fragments.GraphFragment;
 import com.mooo.hairyone.td5tester.fragments.InjectorFragment;
 import com.mooo.hairyone.td5tester.fragments.TemperatureAndPressureFragment;
 
@@ -30,12 +32,23 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
+    // Single task: the boot receiver and the cable both start this activity,
+    // and they now land on the one already open instead of stacking a copy.
     @Override
-    public void onConfigurationChanged(Configuration newConfig){
-        // https://stackoverflow.com/questions/4544534/the-xml-is-not-switching-when-device-orientation-change
-        super.onConfigurationChanged(newConfig);
-        log.debug("");
-        setContentView(R.layout.activity_main);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
+            EcuSession.get(this).cableAttached();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Leaving the app for good (Back) lets go of the ECU; a rebuild for a
+        // new window size keeps the link running.
+        if (isFinishing()) EcuSession.get(this).shutdown();
+        super.onDestroy();
     }
 
     @Override
@@ -49,8 +62,10 @@ public class MainActivity extends AppCompatActivity {
         log.debug("-------------------------------------------");
         log.info(String.format("logging to %s", log_filename));
 
-        setContentView(R.layout.activity_main);
+        // Created now, so it watches the cable from the start.
+        EcuSession.get(this);
 
+        setContentView(R.layout.activity_main);
 
 
         //getSupportActionBar().setDisplayShowHomeEnabled(false);
@@ -67,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         // Seven fixed tabs do not fit a half-screen window.
         float widthDp = getResources().getConfiguration().screenWidthDp;
         // The link opens on its own, so the app starts on the live gauges.
-        viewPager.setCurrentItem(1, false);
+        if (savedInstanceState == null) viewPager.setCurrentItem(1, false);
         tabLayout.setTabMode(widthDp < 700
                 ? com.google.android.material.tabs.TabLayout.MODE_SCROLLABLE
                 : com.google.android.material.tabs.TabLayout.MODE_FIXED);
@@ -80,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new InjectorFragment(), getString(R.string.tab_injector));
         adapter.addFragment(new FuelDemandFragment(), getString(R.string.tab_expert));
         adapter.addFragment(new TemperatureAndPressureFragment(), getString(R.string.tab_acc_temp));
+        adapter.addFragment(new GraphFragment(), getString(R.string.tab_graph));
         adapter.addFragment(new ActuatorFragment(), getString(R.string.tab_tests));
         adapter.addFragment(new SettingsFragment(), getString(R.string.tab_settings));
         viewPager.setAdapter(adapter);

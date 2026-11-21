@@ -79,7 +79,7 @@
                     app:gaugeMin="0"
                     app:gaugeMax="130"
                     app:gaugeUnit="°C"
-                    app:gaugeCaption="LIQUIDE" />
+                    app:gaugeCaption="T° MOTEUR" />
             </LinearLayout>
 
             <LinearLayout

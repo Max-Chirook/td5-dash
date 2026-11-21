@@ -69,7 +69,7 @@
                 app:gaugeMax="130"
                 app:gaugeDecimals="0"
                 app:gaugeUnit="°C"
-                app:gaugeCaption="LIQUIDE" />
+                app:gaugeCaption="T° MOTEUR" />
             <com.mooo.hairyone.td5tester.views.GaugeView
                 android:id="@+id/gAIRFLOW"
                 android:layout_width="0dp"

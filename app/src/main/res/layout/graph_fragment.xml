@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <!-- Every signal the app reads, with its live value; tap one to chart it. -->
+    <ScrollView
+        android:id="@+id/svSignals"
+        android:layout_width="210dp"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:background="@drawable/card"
+        android:fadeScrollbars="false"
+        android:scrollbarSize="3dp">
+
+        <LinearLayout
+            android:id="@+id/llSignals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp" />
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvGraphTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.10"
+                    android:textColor="@color/labelSecondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="RÉGIME MOTEUR" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvGraphValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-light"
+                        android:fontFeatureSettings="tnum"
+                        android:includeFontPadding="false"
+                        android:textColor="@color/label"
+                        android:textSize="40sp"
+                        tools:text="2450" />
+
+                    <TextView
+                        android:id="@+id/tvGraphUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:textColor="@color/labelSecondary"
+                        android:textSize="14sp"
+                        tools:text="TR/MIN" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llWindows"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/segmented_bg"
+                android:orientation="horizontal"
+                android:padding="3dp" />
+        </LinearLayout>
+
+        <com.mooo.hairyone.td5tester.views.LineChartView
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <include
+                android:id="@+id/statMin"
+                layout="@layout/graph_stat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <include
+                android:id="@+id/statMax"
+                layout="@layout/graph_stat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <include
+                android:id="@+id/statMean"
+                layout="@layout/graph_stat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/btGraphReset"
+                android:layout_width="112dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_card"
+                android:gravity="center"
+                android:maxLines="2"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/graph_reset"
+                android:textColor="@color/colorAccent"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/graph_stats_scope"
+            android:textColor="@color/labelTertiary"
+            android:textSize="11sp" />
+    </LinearLayout>
+</LinearLayout>

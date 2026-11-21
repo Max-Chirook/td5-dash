@@ -125,4 +125,6 @@ public class FTDI {
     // Latency
     public static final int LATENCY_MIN = 12;
     public static final int LATENCY_MAX = 255;
+    // What the live loop uses: replies reach the app as soon as they arrive.
+    public static final int LATENCY_FAST = 2;
 }

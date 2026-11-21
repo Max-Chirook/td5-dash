@@ -12,7 +12,7 @@ public class Consts {
     public static final int READ_RESPONSE_TIMEOUT = 500;
 
     public static final String ACTION_USB_PERMISSION = "com.mooo.hairyone.td5tester.USB_PERMISSION";
-    public static final int PERMISSION_WAIT_SECS = 5;
+    public static final int PERMISSION_WAIT_SECS = 30;
 
     public static final int RESPONSE_BUFFER_SIZE = 512;
 

@@ -47,6 +47,17 @@ public final class Conversions {
         return rawVoltsScale * 10.0;
     }
 
+    /**
+     * Pedal travel taken from the driver demand of the fuelling frame, which
+     * follows the pedal on the vehicle, where the supply channel stays still.
+     * fullDemandMg is the demand read with the pedal on the floor.
+     */
+    public static double pedalPercentFromDemand(double demandMg, double fullDemandMg) {
+        if (isNoReading(demandMg) || fullDemandMg <= 0) return NO_READING;
+        double percent = demandMg / fullDemandMg * 100.0;
+        return Math.max(0.0, Math.min(100.0, percent));
+    }
+
     /** 0 and 4.4 kg/h are what a disconnected or dead air meter reports. */
     public static double airFlowOrNoReading(double kgh) {
         if (kgh == 0.0 || Math.abs(kgh - 4.4) < 0.05) return NO_READING;
