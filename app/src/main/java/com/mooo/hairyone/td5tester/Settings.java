@@ -36,6 +36,7 @@ public final class Settings {
     private static final String INJ = "Injecteurs";
     private static final String PEDAL = "Pédale";
     private static final String COND = "Conditions de mesure";
+    private static final String FUEL = "Consommation";
 
     public static final List<Entry> ENTRIES = new ArrayList<>();
 
@@ -74,6 +75,8 @@ public final class Settings {
         add("track_warn_high", PEDAL, "Voie — orange au-dessus de", "V", 4.3f);
         add("track_alert_high", PEDAL, "Voie — rouge au-dessus de", "V", 4.6f);
         add("pedal_full_mg", PEDAL, "Pédale au plancher — demande Expert", "mg", 50);
+
+        add("fuel_correction", FUEL, "Correction de la consommation", "%", 100);
 
         add("warm_c", COND, "Moteur considéré chaud à", "°C", 80);
         add("cold_c", COND, "Moteur considéré froid sous", "°C", 40);

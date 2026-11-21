@@ -58,6 +58,28 @@ public final class Conversions {
         return Math.max(0.0, Math.min(100.0, percent));
     }
 
+    /** Diesel density at about 15 °C, in kg/L. */
+    public static final double DIESEL_KG_PER_L = 0.835;
+    /** Below this the vehicle counts as stopped and the economy is given per hour. */
+    public static final double MOVING_KMH = 5.0;
+
+    /**
+     * Fuel flow from the injected quantity per stroke. Each of the five
+     * cylinders injects once every two turns. correctionPercent scales the
+     * result, so it can be matched against a fill-up.
+     */
+    public static double fuelLitresPerHour(double mgPerStroke, double rpm, double correctionPercent) {
+        if (isNoReading(mgPerStroke) || isNoReading(rpm) || mgPerStroke < 0 || rpm <= 0) return 0.0;
+        double mgPerHour = mgPerStroke * rpm * 2.5 * 60.0;
+        return mgPerHour / 1e6 / DIESEL_KG_PER_L * correctionPercent / 100.0;
+    }
+
+    /** Litres per 100 km, or NO_READING when the vehicle is stopped. */
+    public static double litresPer100Km(double litresPerHour, double kmh) {
+        if (isNoReading(litresPerHour) || isNoReading(kmh) || kmh < MOVING_KMH) return NO_READING;
+        return litresPerHour / kmh * 100.0;
+    }
+
     /** 0 and 4.4 kg/h are what a disconnected or dead air meter reports. */
     public static double airFlowOrNoReading(double kgh) {
         if (kgh == 0.0 || Math.abs(kgh - 4.4) < 0.05) return NO_READING;

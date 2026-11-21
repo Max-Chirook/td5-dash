@@ -520,7 +520,8 @@ public final class EcuSession {
                     }
                     if (mDashboardRunning && due.contains(Requests.RequestPidEnum.VEHICLE_SPEED) && get_pid(Requests.RequestPidEnum.VEHICLE_SPEED)) {
                         // 03 61 0D [00] 71
-                        logRecord.VehicleSpeed = mReadBuffer[3];
+                        // Unsigned: a signed byte would turn 130 km/h into -126.
+                        logRecord.VehicleSpeed = (short) (mReadBuffer[3] & 0xFF);
 
                         EventBus.getDefault().post(new DashboardEvent(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, logRecord.VehicleSpeed ));
                         pid_count++;

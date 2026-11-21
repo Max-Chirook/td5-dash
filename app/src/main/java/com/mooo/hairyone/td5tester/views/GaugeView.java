@@ -233,6 +233,13 @@ public class GaugeView extends View {
 
     public void setCaption(String caption) { this.caption = caption; invalidate(); }
 
+    /** Changes the unit under the reading, for a gauge that switches between two. */
+    public void setUnit(String unit) {
+        if (unit == null ? this.unit == null : unit.equals(this.unit)) return;
+        this.unit = unit;
+        invalidate();
+    }
+
     /** A second line under the main reading, used by the hero gauge for speed. */
     public void setSecondary(String secondary) { this.secondary = secondary; invalidate(); }
 

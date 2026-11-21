@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mooo.hairyone.td5tester.Conversions;
+import com.mooo.hairyone.td5tester.FuelEconomy;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
 import com.mooo.hairyone.td5tester.RunningStats;
@@ -23,7 +24,7 @@ public class DashboardFragment extends BaseFragment {
 
     Logger log = Log4jHelper.getLogger(this.getClass());
 
-    GaugeView gRPM, gVOLT, gTURBO, gCOOLANT, gAIRFLOW;
+    GaugeView gRPM, gVOLT, gTURBO, gCOOLANT, gAIRFLOW, gFUEL;
     TextView tvWarmup;
 
     // Below this the engine is still coming up to temperature; the strip is
@@ -41,13 +42,25 @@ public class DashboardFragment extends BaseFragment {
     // Process-wide, so a split-screen rebuild does not start it over.
     private static final RunningStats battery = new RunningStats();
 
+    // Fuel economy comes from the injected quantity, the engine speed and the
+    // road speed, all three read on every pass.
+    private float rpm = Float.NaN;
+    private float kmh = Float.NaN;
+    private static final FuelEconomy trip = new FuelEconomy();
+
     public DashboardFragment() { /* Required empty public constructor */ }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDashboardEvent(DashboardEvent event) {
         float value = (float) event.value;
         switch (event.data_type) {
-            case RPM:             gRPM.setValue(value); break;
+            case RPM:
+                gRPM.setValue(value);
+                rpm = value;
+                break;
+            case INJECTION_QUANTITY:
+                updateFuel(value);
+                break;
             case BATTERY_VOLTAGE:
                 gVOLT.setValue(value);
                 battery.add(value);
@@ -61,6 +74,7 @@ public class DashboardFragment extends BaseFragment {
                 break;
             case VEHICLE_SPEED:
                 gRPM.setSecondary(String.format("%.0f km/h", value));
+                kmh = value;
                 break;
             case AIR_FLOW: {
                 double flow = Conversions.airFlowOrNoReading(value);
@@ -87,7 +101,34 @@ public class DashboardFragment extends BaseFragment {
         gCOOLANT.resetPeak();
         battery.reset();
         gVOLT.setFootnote(null);
+        trip.reset();
+        showTripAverage();
         warmAnnounced = false;
+    }
+
+    /**
+     * L/100 km while moving; stopped, a distance figure would be meaningless,
+     * so the gauge shows L/h instead and says so in its unit.
+     */
+    private void updateFuel(float mgPerStroke) {
+        double perHour = Conversions.fuelLitresPerHour(mgPerStroke, rpm, s("fuel_correction"));
+        trip.update(perHour, kmh, android.os.SystemClock.elapsedRealtime());
+        double per100 = Conversions.litresPer100Km(perHour, kmh);
+        if (Conversions.isNoReading(per100)) {
+            gFUEL.setUnit(getString(R.string.unit_l_per_hour));
+            gFUEL.setValue((float) perHour);
+        } else {
+            gFUEL.setUnit(getString(R.string.unit_l_per_100));
+            gFUEL.setValue((float) per100);
+        }
+        showTripAverage();
+    }
+
+    private void showTripAverage() {
+        double avg = trip.averagePer100Km();
+        // A dash until the first kilometre, so the caption sits at the same
+        // height as its neighbours from the start.
+        gFUEL.setFootnote(Double.isNaN(avg) ? "moy. —" : String.format("moy. %.1f L/100", avg));
     }
 
     private void updateWarmup(float celsius) {
@@ -125,6 +166,7 @@ public class DashboardFragment extends BaseFragment {
         gCOOLANT.setBands(none, none, s("coolant_warn"), s("coolant_alert"));
         gCOOLANT.setColdBelow(s("coolant_cold"));
         gAIRFLOW.setBands(none, none, s("maf_warn"), s("maf_alert"));
+        gFUEL.setBands(none, none, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
     }
 
     private float s(String key) {
@@ -149,8 +191,10 @@ public class DashboardFragment extends BaseFragment {
         gTURBO = view.findViewById(R.id.gTURBO);
         gCOOLANT = view.findViewById(R.id.gCOOLANT);
         gAIRFLOW = view.findViewById(R.id.gAIRFLOW);
+        gFUEL = view.findViewById(R.id.gFUEL);
         tvWarmup = view.findViewById(R.id.tvWarmup);
 
+        showTripAverage();
         if (!battery.isEmpty()) gVOLT.setFootnote(String.format("moy. %.1f", battery.mean()));
 
         // Read in turn with the other slow values, not on every pass.
@@ -168,6 +212,7 @@ public class DashboardFragment extends BaseFragment {
         gCOOLANT.setInfo(getString(R.string.t_coolant), getString(R.string.i_coolant));
         gAIRFLOW.setInfo(getString(R.string.t_airflow), getString(R.string.i_airflow));
         gVOLT.setInfo(getString(R.string.t_volt), getString(R.string.i_volt));
-        GaugeInfoSheet.attach(gRPM, gTURBO, gCOOLANT, gAIRFLOW, gVOLT);
+        gFUEL.setInfo(getString(R.string.t_fuel_economy), getString(R.string.i_fuel_economy));
+        GaugeInfoSheet.attach(gRPM, gTURBO, gCOOLANT, gAIRFLOW, gVOLT, gFUEL);
     }
 }

@@ -98,5 +98,17 @@
                 app:gaugeDecimals="1"
                 app:gaugeUnit="VOLT"
                 app:gaugeCaption="BATTERIE" />
+            <com.mooo.hairyone.td5tester.views.GaugeView
+                android:id="@+id/gFUEL"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                app:gaugeMin="0"
+                app:gaugeMax="30"
+                app:gaugeDecimals="1"
+                app:gaugeUnit="L/100 KM"
+                app:gaugeCaption="CONSO" />
+
         </LinearLayout>
 </LinearLayout>
