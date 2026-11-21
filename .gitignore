@@ -6,3 +6,6 @@ local.properties
 .DS_Store
 dist/
 docs/
+keystore.properties
+*.jks
+*.keystore
