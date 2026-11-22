@@ -44,8 +44,8 @@
 
     <string name="t_fuel_economy">Consommation instantanée</string>
     <string name="i_fuel_economy" formatted="false">En roulant, la jauge donne des litres aux 100 km ; à l\'arrêt, des litres par heure (L/H s\'affiche alors sous le chiffre). La ligne « moy. » est la moyenne du trajet depuis la connexion, affichée après le premier kilomètre.\n\nLe calcul part de la quantité injectée annoncée par le calculateur, du régime et de la vitesse. Compare la moyenne avec un plein : si elle s\'écarte, ajuste la correction dans Réglages, section Consommation (par exemple 108 % si le réel est 8 % au-dessus).</string>
-    <string name="unit_l_per_100">L/100 KM</string>
-    <string name="unit_l_per_hour">L/H</string>
+    <string name="unit_l_per_100">L/100 km</string>
+    <string name="unit_l_per_hour">L/h</string>
 
     <string name="t_inj">Balance injecteur</string>
     <string name="i_inj">Ces valeurs se regardent moteur chaud et au ralenti. Dans l\'idéal elles tiennent entre -4 et +4, et la tolérance maximale va de -15 à +15.\n\nSi un injecteur est défectueux, les autres compensent et sortent eux aussi de la plage. Il faut donc quand même trouver le coupable.</string>

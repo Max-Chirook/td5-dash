@@ -41,21 +41,23 @@ public class GaugeView extends View {
     private final RectF arcBounds = new RectF();
     private final RectF cardBounds = new RectF();
 
-    private final float density;
+    // Protected so the other gauge styles (ClusterDialView, BarGaugeView,
+    // ReadoutView) share the reading logic and only draw differently.
+    protected final float density;
     private float cornerRadius;
 
-    private float minValue = 0f;
-    private float maxValue = 100f;
+    protected float minValue = 0f;
+    protected float maxValue = 100f;
     private float targetValue = 0f;
-    private float shownValue = 0f;
-    private int decimals = 0;
-    private String unit = "";
-    private String caption = "";
-    private boolean hasValue = false;
+    protected float shownValue = 0f;
+    protected int decimals = 0;
+    protected String unit = "";
+    protected String caption = "";
+    protected boolean hasValue = false;
     private boolean hero = false;
-    private String secondary = null;
+    protected String secondary = null;
     // A small line under the caption, styled like the session peak.
-    private String footnote = null;
+    protected String footnote = null;
 
     private ValueAnimator animator;
 
@@ -67,7 +69,7 @@ public class GaugeView extends View {
     /** For ambient pressure, which is only read now and then. */
     public static final long STALE_RARE_MS = 60000;
     private long staleAfterMs = STALE_AFTER_MS;
-    private boolean stale = false;
+    protected boolean stale = false;
     private final Runnable goStale = () -> { stale = true; invalidate(); };
 
     private boolean trackPeak = false;
@@ -82,11 +84,11 @@ public class GaugeView extends View {
     private float coldBelow = Float.NEGATIVE_INFINITY;
     private float alertBelow = Float.NEGATIVE_INFINITY;
     private float warnBelow = Float.NEGATIVE_INFINITY;
-    private float warnAbove = Float.POSITIVE_INFINITY;
-    private float alertAbove = Float.POSITIVE_INFINITY;
+    protected float warnAbove = Float.POSITIVE_INFINITY;
+    protected float alertAbove = Float.POSITIVE_INFINITY;
     private Float origin = null;
 
-    private int neutralColor, coldColor, warnColor, alertColor, surfaceColor, trackColor;
+    protected int neutralColor, coldColor, warnColor, alertColor, surfaceColor, trackColor;
 
     public GaugeView(Context context) { this(context, null); }
 
@@ -254,7 +256,23 @@ public class GaugeView extends View {
         return STATE_NORMAL;
     }
 
-    private int stateColor() {
+    /** The grey line under the reading: the session peak if tracked, else the footnote. */
+    protected String footText() {
+        if (!hasValue) return null;
+        if (trackPeak && peak > Float.NEGATIVE_INFINITY) {
+            return String.format("max %." + decimals + "f", peak);
+        }
+        return footnote;
+    }
+
+    /** Where a value sits between the minimum and the maximum, from 0 to 1. */
+    protected float fractionOf(float value) {
+        float span = maxValue - minValue;
+        if (span <= 0) return 0f;
+        return Math.max(0f, Math.min(1f, (value - minValue) / span));
+    }
+
+    protected int stateColor() {
         switch (getState()) {
             case STATE_ALERT: return alertColor;
             case STATE_WARN: return warnColor;
@@ -391,7 +409,7 @@ public class GaugeView extends View {
         }
     }
 
-    private static int blend(int base, int tint, float amount) {
+    protected static int blend(int base, int tint, float amount) {
         return Color.rgb(
                 (int) (Color.red(base) * (1 - amount) + Color.red(tint) * amount),
                 (int) (Color.green(base) * (1 - amount) + Color.green(tint) * amount),

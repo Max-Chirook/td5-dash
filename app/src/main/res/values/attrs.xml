@@ -7,5 +7,7 @@
         <attr name="gaugeUnit" format="string" />
         <attr name="gaugeCaption" format="string" />
         <attr name="gaugeHero" format="boolean" />
+        <attr name="gaugeTickStep" format="float" />
+        <attr name="gaugeTickScale" format="float" />
     </declare-styleable>
 </resources>
