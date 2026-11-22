@@ -25,8 +25,19 @@ public class BarGaugeView extends GaugeView {
 
     public BarGaugeView(Context context) { this(context, null); }
 
+    // A tile is the larger form used in the detail tabs: its own dark card,
+    // bigger figures and a thick bar. Without it, the slim strip of the
+    // main tab.
+    private boolean tile = false;
+    private final RectF card = new RectF();
+
     public BarGaugeView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        if (attrs != null) {
+            android.content.res.TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GaugeView);
+            tile = a.getBoolean(R.styleable.GaugeView_gaugeTile, false);
+            a.recycle();
+        }
         label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         value.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         value.setFontFeatureSettings("tnum");
@@ -38,41 +49,52 @@ public class BarGaugeView extends GaugeView {
     @Override protected void onDraw(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
-        // Drawn on a 280 × 90 px pattern, scaled to the height but never wider
-        // than the width allows, and centred when the height is generous.
-        float s = Math.min(h / 90f, w / 280f);
-        float oy = (h - 90f * s) / 2f;
+        // Drawn on a fixed pattern (280 × 90 px for the strip, 320 × 110 for a
+        // tile), scaled to the height but never wider than the width allows,
+        // and centred when the height is generous.
+        float pw = tile ? 320f : 280f, ph = tile ? 110f : 90f;
+        float s = Math.min(h / ph, w / pw);
+        if (tile) {
+            bar.setColor(color(R.color.tile));
+            card.set(0, 0, w, h);
+            float r = 12f * density;
+            canvas.drawRoundRect(card, r, r, bar);
+        }
+        float oy = (h - ph * s) / 2f;
         canvas.save();
         canvas.translate(0, oy);
-        float pad = 6f * density;
+        float pad = tile ? 20f * s : 6f * density;
         float left = pad;
         float right = w - pad;
+        float labelSize = tile ? 17f : 15f, labelY = tile ? 34f : 32f;
+        float valueSize = tile ? 34f : 27f, unitSize = tile ? 16f : 14f, valueY = tile ? 40f : 34f;
+        float barTop = tile ? 66f : 46f, barThick = tile ? 14f : 6f, footY = tile ? 100f : 76f;
 
         int state = stale ? STATE_NORMAL : getState();
         int stateColor = stale ? trackColor : stateColor();
 
-        label.setTextSize(15f * s);
-        label.setLetterSpacing(0.04f);
-        label.setColor(color(stale ? R.color.labelTertiary : R.color.labelSecondary));
-        canvas.drawText(caption == null ? "" : caption, left, 32f * s, label);
+        label.setTextSize(labelSize * s);
+        label.setLetterSpacing(tile ? 0.01f : 0.04f);
+        label.setColor(color(stale ? R.color.labelTertiary : tile ? R.color.labelTile : R.color.labelSecondary));
+        canvas.drawText(caption == null ? "" : caption, left, labelY * s, label);
 
         // The value, its unit set smaller just after it. Readings centred on
         // zero carry their sign either way.
         String text = hasValue ? String.format("%." + decimals + "f", shownValue) : "—";
         if (hasValue && origin != null && shownValue > origin && !text.matches("[0.,]+")) text = "+" + text;
         String u = unit == null || unit.isEmpty() ? "" : " " + unit;
-        value.setTextSize(14f * s);
+        value.setTextSize(unitSize * s);
         float unitWidth = value.measureText(u);
         value.setColor(color(R.color.labelSecondary));
-        canvas.drawText(u, right, 34f * s, value);
-        value.setTextSize(27f * s);
+        canvas.drawText(u, right, valueY * s, value);
+        value.setTextSize(valueSize * s);
         int textColor = state == STATE_NORMAL ? color(R.color.label) : stateColor;
         if (stale) textColor = color(R.color.labelTertiary);
         value.setColor(textColor);
-        canvas.drawText(text, right - unitWidth, 34f * s, value);
+        canvas.drawText(text, right - unitWidth, valueY * s, value);
 
-        float top = 46f * s;
-        float thick = 6f * s;
+        float top = barTop * s;
+        float thick = barThick * s;
         float span = right - left;
         bar.setColor(trackColor);
         rect.set(left, top, right, top + thick);
@@ -89,7 +111,8 @@ public class BarGaugeView extends GaugeView {
             // A small mark where zero sits.
             bar.setColor(color(R.color.labelTertiary));
             float zx = left + span * fractionOf(origin);
-            rect.set(zx - 1f * s, top - 4f * s, zx + 1f * s, top + thick + 4f * s);
+            float mark = tile ? 1.5f : 1f;
+            rect.set(zx - mark * s, top - 5f * s, zx + mark * s, top + thick + 5f * s);
             canvas.drawRect(rect, bar);
         }
         if (hasValue) {
@@ -107,10 +130,10 @@ public class BarGaugeView extends GaugeView {
 
         String foot = stale ? "SIGNAL PERDU" : footText();
         if (foot != null) {
-            label.setTextSize(13f * s);
+            label.setTextSize((tile ? 12f : 13f) * s);
             label.setLetterSpacing(0.02f);
             label.setColor(stale ? warnColor : footColor(color(R.color.labelTertiary)));
-            canvas.drawText(foot, left, 76f * s, label);
+            canvas.drawText(foot, left, footY * s, label);
         }
 
         // A short verdict on the right of the same line, after a coloured dot.

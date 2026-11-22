@@ -36,17 +36,29 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingStart">6dp</item>
-        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingTop">2dp</item>
         <item name="android:letterSpacing">0.10</item>
         <item name="android:textColor">@color/labelTertiary</item>
         <item name="android:textSize">11sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
-    <!-- One bar in such a column: they share the height between them. -->
+    <!-- One tile in such a column: they share the height between them. -->
     <style name="ClusterBar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="gaugeTile">true</item>
+    </style>
+
+    <!-- One injector column; five sit side by side in a tile. -->
+    <style name="InjectorColumn">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="gaugeMin">-15</item>
+        <item name="gaugeMax">15</item>
+        <item name="gaugeDecimals">1</item>
     </style>
 </resources>

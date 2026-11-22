@@ -1,49 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The five injector balances, centred on zero, shared by both layouts. -->
+<!-- The five injector balances as columns side by side in one tile, sharing
+     the green ideal band and the zero line. Shared by both layouts. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_weight="1"
-    android:orientation="vertical">
+    android:background="@drawable/tile"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="4dp">
 
-    <com.mooo.hairyone.td5tester.views.BarGaugeView
+    <com.mooo.hairyone.td5tester.views.ColumnGaugeView
         android:id="@+id/gPOWER_BALANCE_1"
-        style="@style/ClusterBar"
-        app:gaugeMin="-15"
-        app:gaugeMax="15"
-        app:gaugeDecimals="1"
-        app:gaugeCaption="Injecteur 1" />
+        style="@style/InjectorColumn"
+        app:gaugeScaleMarks="true"
+        app:gaugeCaption="Inj. 1" />
 
-    <com.mooo.hairyone.td5tester.views.BarGaugeView
+    <com.mooo.hairyone.td5tester.views.ColumnGaugeView
         android:id="@+id/gPOWER_BALANCE_2"
-        style="@style/ClusterBar"
-        app:gaugeMin="-15"
-        app:gaugeMax="15"
-        app:gaugeDecimals="1"
-        app:gaugeCaption="Injecteur 2" />
+        style="@style/InjectorColumn"
+        app:gaugeCaption="Inj. 2" />
 
-    <com.mooo.hairyone.td5tester.views.BarGaugeView
+    <com.mooo.hairyone.td5tester.views.ColumnGaugeView
         android:id="@+id/gPOWER_BALANCE_3"
-        style="@style/ClusterBar"
-        app:gaugeMin="-15"
-        app:gaugeMax="15"
-        app:gaugeDecimals="1"
-        app:gaugeCaption="Injecteur 3" />
+        style="@style/InjectorColumn"
+        app:gaugeCaption="Inj. 3" />
 
-    <com.mooo.hairyone.td5tester.views.BarGaugeView
+    <com.mooo.hairyone.td5tester.views.ColumnGaugeView
         android:id="@+id/gPOWER_BALANCE_4"
-        style="@style/ClusterBar"
-        app:gaugeMin="-15"
-        app:gaugeMax="15"
-        app:gaugeDecimals="1"
-        app:gaugeCaption="Injecteur 4" />
+        style="@style/InjectorColumn"
+        app:gaugeCaption="Inj. 4" />
 
-    <com.mooo.hairyone.td5tester.views.BarGaugeView
+    <com.mooo.hairyone.td5tester.views.ColumnGaugeView
         android:id="@+id/gPOWER_BALANCE_5"
-        style="@style/ClusterBar"
-        app:gaugeMin="-15"
-        app:gaugeMax="15"
-        app:gaugeDecimals="1"
-        app:gaugeCaption="Injecteur 5" />
+        style="@style/InjectorColumn"
+        app:gaugeCaption="Inj. 5" />
 </LinearLayout>

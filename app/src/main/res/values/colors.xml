@@ -23,6 +23,11 @@
     <color name="stateAlert">#FF453A</color>
     <!-- The long-term total, kept apart from the state colours. -->
     <color name="stateTotal">#A99CFF</color>
+    <!-- The cluster tiles of the detail tabs, a step above the black. -->
+    <color name="tile">#161618</color>
+    <color name="labelTile">#D8D8DC</color>
+    <color name="goodBand">#13241A</color>
+    <color name="goodBandText">#3F8F57</color>
     <color name="stateIdle">#48484A</color>
     <color name="gaugeNeutral">#F2F2F7</color>
     <color name="track">#2A2A2C</color>
