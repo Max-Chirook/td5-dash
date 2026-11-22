@@ -35,15 +35,29 @@ court pour attirer le regard à lui seul.
 
 ### Principal
 
-Régime en grand avec la vitesse dessous, puis turbo, liquide, débitmètre et batterie. Un
-bandeau apparaît tant que le moteur n'est pas chaud, puis disparaît. Le régime, le turbo
-et le liquide retiennent leur **pic de la session**, remis à zéro à chaque connexion.
+Un combiné d'instruments : deux grands cadrans, **régime** (avec la vitesse dessous) et
+**turbo**, les zones orange et rouge tracées en sombre sur le cadran. Au centre, la
+**consommation instantanée** (L/100 km en roulant, L/h à l'arrêt) avec la moyenne et les
+kilomètres. En bas, **batterie**, **T° moteur** et **débitmètre** en barres. Un bandeau
+apparaît tant que le moteur n'est pas chaud.
+
+- **Trajet / Total** : les petites lignes sous chaque valeur (max, moyennes, kilomètres)
+  montrent le trajet en cours ou, en violet, le total conservé jusqu'à sa remise à zéro
+  (appui long sur « Total »).
+- **Autonomie** : en haut à gauche, les kilomètres et litres restants. On déclare chaque
+  plein, complet ou partiel ; les litres affichés par la pompe servent à **caler
+  automatiquement la consommation** d'un plein complet à l'autre, et à signaler les
+  trajets faits sans la tablette.
+- **État du débitmètre** : sous sa barre, l'écart entre le débitmètre et l'estimation du
+  calculateur par le capteur de collecteur, mesuré moteur chaud, en charge et en régime
+  stable (EGR fermée). Vert, orange ou rouge, avec l'historique des 10 derniers trajets.
 
 ### Injecteurs
 
 ![Injecteurs](screenshots/02-injecteurs.png)
 
-Balance des cinq injecteurs, en jauge bipolaire partant de zéro. L'application connaît le
+Balance des cinq injecteurs en colonnes autour de zéro, sur une bande verte de −4 à +4 :
+l'injecteur qui s'écarte saute aux yeux. L'application connaît le
 régime et la température : elle annonce **MOTEUR FROID** ou **PAS AU RALENTI** quand les
 conditions de mesure ne sont pas réunies, plutôt que de laisser lire des valeurs qui ne
 veulent rien dire.
@@ -52,8 +66,10 @@ veulent rien dire.
 
 ![Expert](screenshots/03-expert.png)
 
-Les huit valeurs de cartographie. Aucune n'a de seuil d'alerte : la documentation
-d'origine est explicite, il n'y a pas de bonne ou de mauvaise valeur.
+Les huit valeurs de cartographie, en tuiles : le gasoil (demande, limiteurs de couple et
+de fumée, quantité injectée) sur la même échelle, l'air et le ralenti à côté. Aucune n'a
+de seuil d'alerte : la documentation d'origine est explicite, il n'y a pas de bonne ou de
+mauvaise valeur.
 
 ### Pédale et températures
 
@@ -85,9 +101,11 @@ confirmation et prévient que c'est irréversible.
 
 ![Réglages](screenshots/06-reglages.png)
 
-Les **29 seuils** qui décident de la couleur des jauges sont modifiables et persistants.
-Les valeurs d'usine viennent des notes publiées par l'auteur de l'application d'origine.
-Un bouton remet tout en place.
+Le **modèle** (Discovery 2, Defender 90, 110 ou 130), qui fixe la capacité utile du
+réservoir, puis les seuils et corrections : couleurs des jauges, **correction de vitesse**
+pour des pneus non d'origine (vitesse compteur et vitesse GPS au même moment, par exemple
+120 et 130), correction de consommation. Les valeurs d'usine des seuils viennent des
+notes publiées par l'auteur de l'application d'origine. Un bouton remet tout en place.
 
 ---
 
@@ -197,3 +215,6 @@ Licence Apache 2.0, voir [LICENSE](LICENSE) et [NOTICE](NOTICE).
   « Boot app », plus fiable.
 - L'**écran partagé** est débloqué côté application, mais certaines ROM d'autoradio
   désactivent le mode fenêtré au niveau du système.
+- Le **calage automatique de la consommation** au plein et le **verdict du débitmètre**
+  (seuils ±8 % et ±15 %) sont vérifiés par des tests et dans l'émulateur, pas encore
+  sur plusieurs pleins réels. Les seuils du débitmètre sont réglables.
