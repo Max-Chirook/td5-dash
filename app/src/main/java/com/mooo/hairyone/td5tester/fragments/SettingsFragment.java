@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
 import com.mooo.hairyone.td5tester.Settings;
+import com.mooo.hairyone.td5tester.Vehicle;
 
 import org.apache.log4j.Logger;
 
@@ -46,6 +47,9 @@ public class SettingsFragment extends BaseFragment {
                         .setNegativeButton(R.string.cancel, null)
                         .setPositiveButton(R.string.set_reset_confirm, (d, w) -> {
                             Settings.resetAll(requireContext());
+                            // The tank goes back to the chosen model's, not a generic one.
+                            int model = Vehicle.model(requireContext());
+                            if (model >= 0) Vehicle.setModel(requireContext(), model);
                             build();
                         })
                         .show());
@@ -68,9 +72,42 @@ public class SettingsFragment extends BaseFragment {
                 header.setTextColor(getResources().getColor(R.color.labelTertiary));
                 header.setPadding(0, (int) (18 * density), 0, (int) (6 * density));
                 list.addView(header);
+                if (section.equals(Settings.VEHICLE)) list.addView(modelRow(density));
             }
             list.addView(row(entry, density));
         }
+    }
+
+    /** The model, chosen from a list; it fills in the tank capacity below it. */
+    private View modelRow(float density) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setBackgroundResource(R.drawable.card);
+        row.setPadding((int) (16 * density), (int) (14 * density),
+                (int) (16 * density), (int) (14 * density));
+        LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rp.bottomMargin = (int) (5 * density);
+        row.setLayoutParams(rp);
+
+        TextView label = new TextView(requireContext());
+        label.setText(R.string.vehicle_model);
+        label.setTextSize(13f);
+        label.setTextColor(getResources().getColor(R.color.label));
+        label.setLayoutParams(new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        row.addView(label);
+
+        String name = Vehicle.name(requireContext());
+        TextView value = new TextView(requireContext());
+        value.setText(name == null ? getString(R.string.vehicle_none) + "  ›" : name + "  ›");
+        value.setTextSize(14f);
+        value.setTextColor(getResources().getColor(name == null ? R.color.stateHigh : R.color.label));
+        row.addView(value);
+
+        row.setOnClickListener(v -> Vehicle.choose(requireContext(), this::build));
+        return row;
     }
 
     private View row(Settings.Entry entry, float density) {

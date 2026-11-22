@@ -34,6 +34,20 @@
             tools:visibility="visible"
             tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
 
+        <!-- Range left in the tank; a touch opens the fill-up screen. -->
+        <TextView
+            android:id="@+id/tvRange"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/toggle_track"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/labelSecondary"
+            android:textSize="13sp"
+            tools:text="Autonomie   412 km  ·  38 L" />
+
         <!-- Trip or long-term total in the grey lines; a long press on
              "Total" offers to reset it. -->
         <LinearLayout

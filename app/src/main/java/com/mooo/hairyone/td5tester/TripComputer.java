@@ -14,18 +14,20 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The trip computer: it follows every reading for the life of the process,
- * whichever screen is showing, and keeps two sets of figures. The trip set
- * starts over at each connection; the total set is saved and kept until the
- * driver resets it. The demo has its own total, so simulated values never
- * end up in the real one.
+ * whichever screen is showing. It keeps the trip figures, which start over at
+ * each connection, and what lasts: the long-term total, the fuel left in the
+ * tank and the air meter's health. The demo has its own copy of everything
+ * that lasts, so simulated values never end up in the vehicle's.
  */
 public final class TripComputer {
 
-    private static final String PREFS_REAL = "totals";
-    private static final String PREFS_DEMO = "totals_demo";
+    private static final String TOTALS = "totals";
+    private static final String TANK = "tank";
+    private static final String MAF = "maf_health";
     private static final long SAVE_EVERY_MS = 30_000;
 
     private static TripComputer instance;
@@ -41,48 +43,80 @@ public final class TripComputer {
     private final Context app;
     private Totals trip = new Totals(System.currentTimeMillis());
     private Totals total;
-    private boolean totalIsDemo;
+    private FuelTank tank;
+    private MafHealth maf;
+    private boolean demo;
 
     private float rpm = Float.NaN;
     private float kmh = Float.NaN;
     private float ambient = Float.NaN;
     private float manifold = Float.NaN;
+    private float coolant = Float.NaN;
+    private float mafMass = Float.NaN;
     private long lastSave = 0;
 
     private TripComputer(Context app) {
         this.app = app;
-        totalIsDemo = Consts.DEBUG_UI;
-        total = load(totalIsDemo);
+        load(Consts.DEBUG_UI);
         EventBus.getDefault().register(this);
     }
 
-    private SharedPreferences prefs(boolean demo) {
-        return app.getSharedPreferences(demo ? PREFS_DEMO : PREFS_REAL, Context.MODE_PRIVATE);
+    // ---- Saving: each set is a map of doubles, stored bit for bit. ----
+
+    private SharedPreferences prefs(String name) {
+        return app.getSharedPreferences(demo ? name + "_demo" : name, Context.MODE_PRIVATE);
     }
 
-    private Totals load(boolean demo) {
-        SharedPreferences p = prefs(demo);
-        long since = p.getLong("since", 0);
-        if (since == 0) {
-            since = System.currentTimeMillis();
-            p.edit().putLong("since", since).apply();
-        }
+    private Map<String, Double> read(String name, Set<String> keys) {
+        SharedPreferences p = prefs(name);
         Map<String, Double> m = new HashMap<>();
-        for (String key : new Totals(0).toMap().keySet()) {
-            if (p.contains(key)) m.put(key, Double.longBitsToDouble(p.getLong(key, 0)));
+        for (String key : p.getAll().keySet()) {
+            if (keys == null || keys.contains(key)) {
+                Object v = p.getAll().get(key);
+                if (v instanceof Long) m.put(key, Double.longBitsToDouble((Long) v));
+            }
         }
-        return Totals.fromMap(m, since);
+        return m;
+    }
+
+    private void write(String name, Map<String, Double> values, long since) {
+        SharedPreferences.Editor e = prefs(name).edit().clear();
+        for (Map.Entry<String, Double> entry : values.entrySet()) {
+            e.putLong(entry.getKey(), Double.doubleToRawLongBits(entry.getValue()));
+        }
+        if (since > 0) e.putString("since", Long.toString(since));
+        e.apply();
+    }
+
+    private void load(boolean demoMode) {
+        demo = demoMode;
+        // Saved as text since 1.5; the first test builds saved it as a number.
+        Object since = prefs(TOTALS).getAll().get("since");
+        long sinceMs = System.currentTimeMillis();
+        if (since instanceof String) sinceMs = Long.parseLong((String) since);
+        else if (since instanceof Long) sinceMs = (Long) since;
+        total = Totals.fromMap(read(TOTALS, new Totals(0).toMap().keySet()), sinceMs);
+        tank = FuelTank.fromMap(read(TANK, null));
+        maf = MafHealth.fromMap(read(MAF, null));
+        if (since == null) save();
     }
 
     public synchronized void save() {
-        SharedPreferences.Editor e = prefs(totalIsDemo).edit();
-        for (Map.Entry<String, Double> entry : total.toMap().entrySet()) {
-            e.putLong(entry.getKey(), Double.doubleToRawLongBits(entry.getValue()));
-        }
-        e.putLong("since", total.sinceMs());
-        e.apply();
+        write(TOTALS, total.toMap(), total.sinceMs());
+        write(TANK, tank.toMap(), 0);
+        write(MAF, maf.toMap(), 0);
         lastSave = SystemClock.elapsedRealtime();
     }
+
+    // ---- What the screens read and do. ----
+
+    public synchronized Totals trip() { return trip; }
+
+    public synchronized Totals total() { return total; }
+
+    public synchronized FuelTank tank() { return tank; }
+
+    public synchronized MafHealth maf() { return maf; }
 
     /** Starts the long-term total over from now. */
     public synchronized void resetTotal() {
@@ -90,22 +124,36 @@ public final class TripComputer {
         save();
     }
 
-    public synchronized Totals trip() { return trip; }
+    public synchronized void fillTank() {
+        tank.fill(Vehicle.tankLitres(app), System.currentTimeMillis());
+        save();
+    }
 
-    public synchronized Totals total() { return total; }
+    public synchronized void addFuel(double litres) {
+        tank.add(litres, Vehicle.tankLitres(app), System.currentTimeMillis());
+        save();
+    }
+
+    /** Kilometres left, at the best average known; NaN until a fill-up is entered. */
+    public synchronized double rangeKm() {
+        return tank.rangeKm(total.fuelAverage());
+    }
+
+    // ---- Following the readings. ----
 
     @Subscribe(threadMode = ThreadMode.POSTING)
     public void onConnectedEvent(ConnectedEvent event) {
         synchronized (this) {
-            // A new connection is a new trip. Switching between the demo and
-            // the vehicle also switches which total is being added to.
-            trip = new Totals(System.currentTimeMillis());
-            if (Consts.DEBUG_UI != totalIsDemo) {
+            // A new connection is a new trip. The air meter's last trip, if
+            // long enough, joins its history.
+            maf.finishTrip();
+            if (Consts.DEBUG_UI != demo) {
                 save();
-                totalIsDemo = Consts.DEBUG_UI;
-                total = load(totalIsDemo);
+                load(Consts.DEBUG_UI);
             }
-            rpm = kmh = ambient = manifold = Float.NaN;
+            trip = new Totals(System.currentTimeMillis());
+            rpm = kmh = ambient = manifold = coolant = mafMass = Float.NaN;
+            save();
         }
     }
 
@@ -130,6 +178,7 @@ public final class TripComputer {
                     total.addBattery(v);
                     break;
                 case COOLANT_TEMP:
+                    coolant = v;
                     trip.addCoolant(v);
                     total.addCoolant(v);
                     break;
@@ -153,11 +202,23 @@ public final class TripComputer {
                     }
                     break;
                 }
+                case MAF_AIR_MASS:
+                    mafMass = v;
+                    break;
+                case MAP_AIR_MASS: {
+                    // Both masses come from the same frame, the meter's first.
+                    double bar = Conversions.boostBar(manifold, ambient);
+                    if (MafHealth.conditionsMet(coolant, Settings.get(app, "warm_c"), bar)) {
+                        maf.add(mafMass, v);
+                    }
+                    break;
+                }
                 case INJECTION_QUANTITY: {
                     double perHour = Conversions.fuelLitresPerHour(v, rpm, Settings.get(app, "fuel_correction"));
                     long now = SystemClock.elapsedRealtime();
                     trip.addFuel(perHour, kmh, now);
                     total.addFuel(perHour, kmh, now);
+                    tank.update(perHour, kmh, now);
                     break;
                 }
                 default:

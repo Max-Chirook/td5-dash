@@ -30,6 +30,7 @@ public final class Settings {
         }
     }
 
+    public static final String VEHICLE = "Véhicule";
     private static final String ENGINE = "Moteur";
     private static final String ELEC = "Électricité";
     private static final String AIR = "Air et turbo";
@@ -46,6 +47,10 @@ public final class Settings {
     }
 
     static {
+        // The model itself is chosen from a list above this row; picking it
+        // fills this in, and it can then be changed by hand.
+        add("tank_l", VEHICLE, "Capacité utile du réservoir", "L", 72);
+
         add("rpm_warn", ENGINE, "Régime — seuil orange", "tr/min", 4200);
         add("rpm_alert", ENGINE, "Régime — seuil rouge", "tr/min", 4800);
         add("coolant_cold", ENGINE, "T° moteur — encore froid sous", "°C", 70);
@@ -63,6 +68,8 @@ public final class Settings {
         add("turbo_alert", AIR, "Turbo — seuil rouge", "bar", 1.42f);
         add("maf_warn", AIR, "Débitmètre — seuil orange", "kg/h", 700);
         add("maf_alert", AIR, "Débitmètre — seuil rouge", "kg/h", 760);
+        add("maf_health_warn", AIR, "État débitmètre — à surveiller au-delà de", "%", 8);
+        add("maf_health_alert", AIR, "État débitmètre — à remplacer au-delà de", "%", 15);
         add("inlet_warn", AIR, "Admission — seuil orange", "°C", 70);
         add("inlet_alert", AIR, "Admission — seuil rouge", "°C", 90);
 

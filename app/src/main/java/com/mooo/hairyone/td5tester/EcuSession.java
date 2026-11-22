@@ -672,7 +672,9 @@ public final class EcuSession {
         post(DashboardEvent.DATA_TYPE.INJECTION_QUANTITY, 5 + load * 42);
         post(DashboardEvent.DATA_TYPE.IDLE_DEMAND, -4 + wave * 8);
         post(DashboardEvent.DATA_TYPE.MAF_AIR_MASS, 410 + load * 300);
-        post(DashboardEvent.DATA_TYPE.MAP_AIR_MASS, 582 + load * 280);
+        // The manifold estimate counts the EGR gas the air meter never sees:
+        // well above it at light load, a few percent above once the EGR shuts.
+        post(DashboardEvent.DATA_TYPE.MAP_AIR_MASS, (410 + load * 300) * (1.03 + 1.2 * Math.max(0, 0.3 - load)));
         post(DashboardEvent.DATA_TYPE.AF_RATIO, 14.2 + (1 - load) * 7);
         post(DashboardEvent.DATA_TYPE.POWER_BALANCE_1, 2 + Math.sin(simulationPhase * 1.3));
         post(DashboardEvent.DATA_TYPE.POWER_BALANCE_2, 1 + Math.sin(simulationPhase * 1.7));

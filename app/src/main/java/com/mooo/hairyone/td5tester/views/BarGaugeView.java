@@ -85,5 +85,30 @@ public class BarGaugeView extends GaugeView {
             label.setColor(stale ? warnColor : footColor(color(R.color.labelTertiary)));
             canvas.drawText(foot, left, 76f * s, label);
         }
+
+        // A short verdict on the right of the same line, after a coloured dot.
+        if (status != null) {
+            label.setTextSize(13f * s);
+            label.setLetterSpacing(0.02f);
+            label.setColor(statusColor);
+            label.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawText(status, right, 76f * s, label);
+            float width = label.measureText(status);
+            label.setTextAlign(Paint.Align.LEFT);
+            bar.setColor(statusColor);
+            canvas.drawCircle(right - width - 9f * s, 71.5f * s, 4f * s, bar);
+        }
+    }
+
+    private String status = null;
+    private int statusColor = 0;
+
+    /** A verdict shown on the right of the grey line, such as the air meter's health. */
+    public void setStatus(String status, int color) {
+        boolean same = status == null ? this.status == null : status.equals(this.status);
+        if (same && color == statusColor) return;
+        this.status = status;
+        this.statusColor = color;
+        invalidate();
     }
 }

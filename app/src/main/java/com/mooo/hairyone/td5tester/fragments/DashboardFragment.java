@@ -1,18 +1,27 @@
 package com.mooo.hairyone.td5tester.fragments;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.widget.TextView;
 
 import com.mooo.hairyone.td5tester.Conversions;
+import com.mooo.hairyone.td5tester.FuelTank;
+import com.mooo.hairyone.td5tester.MafHealth;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
 import com.mooo.hairyone.td5tester.Settings;
 import com.mooo.hairyone.td5tester.Totals;
 import com.mooo.hairyone.td5tester.TripComputer;
+import com.mooo.hairyone.td5tester.Vehicle;
 import com.mooo.hairyone.td5tester.events.ConnectedEvent;
 import com.mooo.hairyone.td5tester.events.DashboardEvent;
+import com.mooo.hairyone.td5tester.views.BarGaugeView;
 import com.mooo.hairyone.td5tester.views.GaugeInfoSheet;
 import com.mooo.hairyone.td5tester.views.GaugeView;
 import com.mooo.hairyone.td5tester.views.ReadoutView;
@@ -33,6 +42,8 @@ public class DashboardFragment extends BaseFragment {
     TextView tvWarmup;
     // The trip / total switch; only the wide layout has it.
     TextView tvTrip, tvTotal;
+    // The range pill; only the wide layout has it.
+    TextView tvRange;
 
     // Below this the engine is still coming up to temperature; the strip is
     // hidden once there, so a clean screen means nothing needs saying.
@@ -141,12 +152,47 @@ public class DashboardFragment extends BaseFragment {
         gFUEL.setFootColor(color);
         if (gFUEL instanceof ReadoutView) ((ReadoutView) gFUEL).setExtra(distance(t, total));
 
+        showRange();
+        if (gAIRFLOW instanceof BarGaugeView) {
+            MafHealth.Status status = computer().maf().status(s("maf_health_warn"), s("maf_health_alert"));
+            double d = computer().maf().deviationPercent();
+            String verdict = DashboardSheets.mafVerdict(status)
+                    + (Double.isNaN(d) ? "" : " " + DashboardSheets.signedPercent(d));
+            ((BarGaugeView) gAIRFLOW).setStatus(verdict, DashboardSheets.mafColor(requireContext(), status));
+        }
+
         if (tvTrip != null) {
             tvTrip.setBackgroundResource(total ? 0 : R.drawable.toggle_trip_on);
             tvTrip.setTextColor(getResources().getColor(total ? R.color.labelSecondary : R.color.label));
             tvTotal.setBackgroundResource(total ? R.drawable.toggle_total_on : 0);
             tvTotal.setTextColor(getResources().getColor(total ? R.color.stateTotal : R.color.labelSecondary));
         }
+    }
+
+    /**
+     * "Autonomie  412 km · 38 L": the figure in white, or orange then red as
+     * the tank runs low, the rest in grey. Only the wide layout has it.
+     */
+    private void showRange() {
+        if (tvRange == null) return;
+        Context c = requireContext();
+        SpannableStringBuilder sb = new SpannableStringBuilder(getString(R.string.range_label) + "   ");
+        FuelTank tank = computer().tank();
+        if (Vehicle.model(c) < 0 || !tank.isKnown()) {
+            sb.append(getString(R.string.range_set));
+        } else {
+            double km = computer().rangeKm();
+            int start = sb.length();
+            sb.append(String.format(Locale.FRANCE, "%.0f", km));
+            sb.setSpan(new ForegroundColorSpan(DashboardSheets.rangeColor(c, km)), start, sb.length(), 0);
+            sb.setSpan(new RelativeSizeSpan(1.3f), start, sb.length(), 0);
+            sb.append(" km");
+            start = sb.length();
+            sb.append("  ·  ");
+            sb.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.labelTertiary)), start, sb.length(), 0);
+            sb.append(String.format(Locale.FRANCE, "%.0f L", tank.remaining()));
+        }
+        if (!TextUtils.equals(tvRange.getText(), sb)) tvRange.setText(sb);
     }
 
     private static void foot(GaugeView gauge, String format, float value, int color) {
@@ -256,6 +302,7 @@ public class DashboardFragment extends BaseFragment {
         tvWarmup = view.findViewById(R.id.tvWarmup);
         tvTrip = view.findViewById(R.id.tvTrip);
         tvTotal = view.findViewById(R.id.tvTotal);
+        tvRange = view.findViewById(R.id.tvRange);
 
         if (tvTrip != null) {
             tvTrip.setOnClickListener(v -> setShowTotal(false));
@@ -283,5 +330,13 @@ public class DashboardFragment extends BaseFragment {
         gVOLT.setInfo(getString(R.string.t_volt), getString(R.string.i_volt));
         gFUEL.setInfo(getString(R.string.t_fuel_economy), getString(R.string.i_fuel_economy));
         GaugeInfoSheet.attach(gRPM, gTURBO, gCOOLANT, gAIRFLOW, gVOLT, gFUEL);
+        // On the cluster the air meter opens its health screen, which carries
+        // the same note at its foot.
+        if (gAIRFLOW instanceof BarGaugeView) {
+            gAIRFLOW.setOnClickListener(v -> DashboardSheets.showMaf(requireContext()));
+        }
+        if (tvRange != null) {
+            tvRange.setOnClickListener(v -> DashboardSheets.showRange(requireContext(), this::showFeet));
+        }
     }
 }
