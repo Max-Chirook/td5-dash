@@ -53,6 +53,8 @@ public final class TripComputer {
     private float manifold = Float.NaN;
     private float coolant = Float.NaN;
     private float mafMass = Float.NaN;
+    private double mafPrevRpm = Double.NaN;
+    private double mafPrevBar = Double.NaN;
     private long lastSave = 0;
 
     private TripComputer(Context app) {
@@ -129,6 +131,22 @@ public final class TripComputer {
         save();
     }
 
+    /**
+     * A full tank with the litres pumped. When the comparison with the fuel
+     * counted since the last full tank holds up, the fuel correction is
+     * adjusted by it, so the figures settle after a few fill-ups.
+     */
+    public synchronized FuelTank.Check fillTank(double pumped) {
+        FuelTank.Check check = tank.fill(Vehicle.tankLitres(app), pumped, System.currentTimeMillis());
+        if (check.result == FuelTank.Check.Result.ADJUSTED) {
+            float before = Settings.get(app, "fuel_correction");
+            float after = (float) Math.max(50, Math.min(200, before * check.ratio()));
+            Settings.set(app, "fuel_correction", Math.round(after * 10) / 10f);
+        }
+        save();
+        return check;
+    }
+
     public synchronized void addFuel(double litres) {
         tank.add(litres, Vehicle.tankLitres(app), System.currentTimeMillis());
         save();
@@ -153,6 +171,7 @@ public final class TripComputer {
             }
             trip = new Totals(System.currentTimeMillis());
             rpm = kmh = ambient = manifold = coolant = mafMass = Float.NaN;
+            mafPrevRpm = mafPrevBar = Double.NaN;
             save();
         }
     }
@@ -207,10 +226,15 @@ public final class TripComputer {
                     break;
                 case MAP_AIR_MASS: {
                     // Both masses come from the same frame, the meter's first.
+                    // Counted only warm, under boost, and with the engine
+                    // holding steady since the previous frame.
                     double bar = Conversions.boostBar(manifold, ambient);
-                    if (MafHealth.conditionsMet(coolant, Settings.get(app, "warm_c"), bar)) {
+                    boolean steady = MafHealth.isSteady(mafPrevRpm, rpm, mafPrevBar, bar);
+                    if (steady && MafHealth.conditionsMet(coolant, Settings.get(app, "warm_c"), bar)) {
                         maf.add(mafMass, v);
                     }
+                    mafPrevRpm = rpm;
+                    mafPrevBar = bar;
                     break;
                 }
                 case INJECTION_QUANTITY: {

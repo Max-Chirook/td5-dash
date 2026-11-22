@@ -37,8 +37,9 @@ public class ReadoutView extends GaugeView {
     @Override protected void onDraw(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
-        // Sized on the 174 × 300 px of the mock-up, and scaled to fit.
-        float s = Math.min(w / 174f, h / 300f);
+        // Sized on the mock-up's 174 px of width, and on the 240 px of height
+        // the lines need, whichever is tighter.
+        float s = Math.min(w / 174f, h / 240f);
         float cx = w / 2f;
         // The figure sits a little above the middle, level with the dial readings.
         float base = h * 0.49f;

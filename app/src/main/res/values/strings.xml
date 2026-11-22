@@ -92,8 +92,15 @@
     <string name="range_add">Ajouter des litres</string>
     <string name="range_add_title">Litres mis à la pompe</string>
     <string name="range_add_confirm">Ajouter</string>
+    <string name="range_only_seen">Seul le gasoil brûlé avec la tablette connectée est décompté : un trajet fait sans elle rend l’autonomie trop optimiste.</string>
+    <string name="range_missed">Au dernier plein, des trajets faits sans la tablette n’avaient pas été décomptés. L’autonomie est trop optimiste jusqu’au prochain plein complet.</string>
+    <string name="fill_pumped_title">Plein complet</string>
+    <string name="fill_pumped_hint">Litres affichés par la pompe. Ils servent à vérifier et caler la consommation.</string>
+    <string name="fill_pumped_confirm">Valider</string>
+    <string name="fill_pumped_unknown">Je ne sais pas</string>
+    <string name="fill_done_title">Plein enregistré</string>
     <string name="maf_title">État du débitmètre</string>
-    <string name="maf_note">Mesuré seulement moteur chaud et turbo au-dessus de 0,4 bar : la vanne EGR est alors fermée et les deux mesures d’air doivent concorder. Chaque trajet donne un chiffre, les 10 derniers sont gardés. Les seuils se règlent dans Réglages, section Air et turbo.</string>
+    <string name="maf_note">Mesuré seulement moteur chaud, turbo au-dessus de 0,4 bar et régime stable : la vanne EGR est alors fermée et les deux mesures d’air doivent concorder. Les accélérations et décélérations franches sont écartées, car les deux mesures n’y réagissent pas à la même vitesse. Chaque trajet donne un chiffre, les 10 derniers sont gardés. Les seuils se règlent dans Réglages, section Air et turbo.</string>
     <string name="maf_reset">Remettre à zéro</string>
     <string name="maf_reset_title">Remettre l’historique à zéro ?</string>
     <string name="maf_reset_body">À faire après le remplacement du débitmètre : les mesures des anciens trajets seront effacées.</string>

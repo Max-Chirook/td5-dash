@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The cluster in split screen: the same pieces as the wide layout, the two
+     dials on top, fuel economy and the slow readings below them. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,109 +8,164 @@
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:orientation="vertical"
-    android:padding="6dp">
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="6dp">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="32dp">
+
+        <TextView
+            android:id="@+id/tvRange"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/toggle_track"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/labelSecondary"
+            android:textSize="12sp"
+            tools:text="Autonomie   412 km  ·  38 L" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="end|center_vertical"
+            android:background="@drawable/toggle_track"
+            android:orientation="horizontal"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/tvTrip"
+                android:layout_width="62dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/trip"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvTotal"
+                android:layout_width="62dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/total"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Shown on its own line here: there is no room beside the switches. -->
     <TextView
         android:id="@+id/tvWarmup"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="5dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
         android:background="@drawable/card"
         android:letterSpacing="0.04"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="7dp"
-        android:paddingBottom="7dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:textSize="11sp"
         android:textStyle="bold"
         android:visibility="gone"
-        tools:text="MOTEUR FROID" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+        tools:visibility="visible"
+        tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <com.mooo.hairyone.td5tester.views.ClusterDialView
+            android:id="@+id/gRPM"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gRPM"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="5000"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="TR/MIN"
-                app:gaugeHero="true"
-                app:gaugeCaption="RÉGIME" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gTURBO"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="1.5"
-                app:gaugeDecimals="2"
-                app:gaugeUnit="BAR"
-                app:gaugeCaption="TURBO" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            app:gaugeMin="0"
+            app:gaugeMax="5000"
+            app:gaugeTickStep="1000"
+            app:gaugeTickScale="1000"
+            app:gaugeUnit="tr/min"
+            app:gaugeCaption="Régime" />
+
+        <com.mooo.hairyone.td5tester.views.ClusterDialView
+            android:id="@+id/gTURBO"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gCOOLANT"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="130"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="°C"
-                app:gaugeCaption="T° MOTEUR" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gAIRFLOW"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="700"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="KG/H"
-                app:gaugeCaption="DÉBITMÈTRE" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            app:gaugeMin="0"
+            app:gaugeMax="1.5"
+            app:gaugeDecimals="2"
+            app:gaugeTickStep="0.5"
+            app:gaugeUnit="bar"
+            app:gaugeCaption="Turbo" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/surface" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="186dp"
+        android:orientation="horizontal">
+
+        <com.mooo.hairyone.td5tester.views.ReadoutView
+            android:id="@+id/gFUEL"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
+            app:gaugeMin="0"
+            app:gaugeMax="30"
+            app:gaugeDecimals="1"
+            app:gaugeUnit="L/100 km"
+            app:gaugeCaption="Conso" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
                 android:id="@+id/gVOLT"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_margin="4dp"
                 app:gaugeMin="10"
                 app:gaugeMax="16"
                 app:gaugeDecimals="1"
-                app:gaugeUnit="VOLT"
-                app:gaugeCaption="BATTERIE" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gFUEL"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="30"
-                app:gaugeDecimals="1"
-                app:gaugeUnit="L/100 KM"
-                app:gaugeCaption="CONSO" />
+                app:gaugeUnit="V"
+                app:gaugeCaption="Batterie" />
 
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gCOOLANT"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:gaugeMin="0"
+                app:gaugeMax="130"
+                app:gaugeUnit="°C"
+                app:gaugeCaption="T° moteur" />
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gAIRFLOW"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:gaugeMin="0"
+                app:gaugeMax="700"
+                app:gaugeUnit="kg/h"
+                app:gaugeCaption="Débitmètre" />
         </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>

@@ -133,18 +133,104 @@ final class DashboardSheets {
             l.addView(text(c, c.getString(R.string.range_unknown), 14, R.color.label));
         }
         gap(l, 14);
+        // Only fuel burnt with the tablet connected is counted; say so, and
+        // louder when the last fill-up showed fuel had gone unseen.
+        boolean missed = tank.lastResult() == FuelTank.Check.Result.MISSED_TRIPS;
+        TextView warning = text(c, c.getString(missed ? R.string.range_missed : R.string.range_only_seen),
+                12, missed ? R.color.stateHigh : R.color.labelTertiary);
+        l.addView(warning);
+        gap(l, 6);
         l.addView(text(c, Vehicle.name(c) + " · réservoir de " + Math.round(capacity)
                 + " L utiles, modifiable dans Réglages.", 12, R.color.labelTertiary));
 
         new AlertDialog.Builder(c, R.style.InfoDialog)
                 .setTitle(R.string.range_title)
                 .setView(l)
-                .setPositiveButton(R.string.range_fill, (d, w) -> {
+                .setPositiveButton(R.string.range_fill, (d, w) -> askFullFill(c, refresh))
+                .setNeutralButton(R.string.range_add, (d, w) -> askLitres(c, refresh))
+                .setNegativeButton(R.string.close, null)
+                .show();
+    }
+
+    /**
+     * A full tank. The litres pumped are asked for, since they are what lets
+     * the app check and settle its fuel figures; they can be skipped.
+     */
+    private static void askFullFill(Context c, Runnable refresh) {
+        EditText field = new EditText(c);
+        field.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        field.setHint("52");
+        field.setTextColor(color(c, R.color.label));
+        field.setHintTextColor(color(c, R.color.labelTertiary));
+        field.setGravity(Gravity.CENTER);
+        LinearLayout l = column(c);
+        l.addView(text(c, c.getString(R.string.fill_pumped_hint), 13, R.color.labelSecondary));
+        l.addView(field);
+        TripComputer tc = TripComputer.get(c);
+        new AlertDialog.Builder(c, R.style.InfoDialog)
+                .setTitle(R.string.fill_pumped_title)
+                .setView(l)
+                .setPositiveButton(R.string.fill_pumped_confirm, (d, w) -> {
+                    double pumped = Double.NaN;
+                    try {
+                        pumped = Double.parseDouble(field.getText().toString().replace(',', '.').trim());
+                    } catch (NumberFormatException ignored) { }
+                    if (pumped > 0) {
+                        float before = Settings.get(c, "fuel_correction");
+                        FuelTank.Check check = tc.fillTank(pumped);
+                        showCheck(c, check, before, Settings.get(c, "fuel_correction"));
+                    } else {
+                        tc.fillTank();
+                    }
+                    refresh.run();
+                })
+                .setNeutralButton(R.string.fill_pumped_unknown, (d, w) -> {
                     tc.fillTank();
                     refresh.run();
                 })
-                .setNeutralButton(R.string.range_add, (d, w) -> askLitres(c, refresh))
-                .setNegativeButton(R.string.close, null)
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /** What the fill-up found, in plain words. */
+    private static void showCheck(Context c, FuelTank.Check check, float before, float after) {
+        String body;
+        switch (check.result) {
+            case ADJUSTED:
+                body = String.format(Locale.FRANCE,
+                        "Depuis le dernier plein : %.1f L pompés pour %.1f L comptés, sur %.0f km.\n\n"
+                                + "La correction de la consommation passe de %.0f %% à %.1f %%. "
+                                + "La conso, les moyennes et l’autonomie en tiennent compte dès maintenant.",
+                        check.pumped, check.counted, check.km, before, after);
+                break;
+            case MISSED_TRIPS:
+                body = String.format(Locale.FRANCE,
+                        "%.1f L pompés pour seulement %.1f L comptés depuis le dernier plein. "
+                                + "Des trajets ont sans doute été faits sans la tablette connectée.\n\n"
+                                + "La correction de la consommation n’est pas modifiée.",
+                        check.pumped, check.counted);
+                break;
+            case NOT_FULL:
+                body = String.format(Locale.FRANCE,
+                        "%.1f L pompés pour %.1f L comptés : c’est trop peu. Ce plein, ou le précédent, "
+                                + "n’était sans doute pas complet.\n\nLa correction de la consommation n’est pas modifiée.",
+                        check.pumped, check.counted);
+                break;
+            case TOO_SHORT:
+                body = String.format(Locale.FRANCE,
+                        "Il faut au moins %.0f km et %.0f L entre deux pleins complets "
+                                + "pour vérifier la consommation.",
+                        FuelTank.CHECK_MIN_KM, FuelTank.CHECK_MIN_LITRES);
+                break;
+            default:
+                body = "Au prochain plein complet, les litres pompés serviront "
+                        + "à vérifier et caler la consommation.";
+                break;
+        }
+        new AlertDialog.Builder(c, R.style.InfoDialog)
+                .setTitle(R.string.fill_done_title)
+                .setMessage(body)
+                .setPositiveButton(R.string.close, null)
                 .show();
     }
 

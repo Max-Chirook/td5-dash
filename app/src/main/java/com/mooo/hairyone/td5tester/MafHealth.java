@@ -30,6 +30,22 @@ public final class MafHealth {
         return coolantC >= warmC && boostBar >= MIN_BOOST_BAR;
     }
 
+    /**
+     * Largest change from one reading to the next that still counts as
+     * steady. Under a sharp change the meter and the manifold estimate do
+     * not react at the same speed, and the comparison would be unfair.
+     */
+    public static final double MAX_RPM_STEP = 150;
+    public static final double MAX_BOOST_STEP = 0.08;
+
+    /** Whether engine speed and boost held still since the previous reading. */
+    public static boolean isSteady(double prevRpm, double rpm, double prevBar, double bar) {
+        if (Double.isNaN(prevRpm) || Double.isNaN(rpm) || Double.isNaN(prevBar) || Double.isNaN(bar)) {
+            return false;
+        }
+        return Math.abs(rpm - prevRpm) <= MAX_RPM_STEP && Math.abs(bar - prevBar) <= MAX_BOOST_STEP;
+    }
+
     /** One pair of air masses read together, in the same units. */
     public void add(double mafMass, double mapMass) {
         if (!(mafMass > 0) || !(mapMass > 0)) return;
