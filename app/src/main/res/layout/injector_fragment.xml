@@ -1,87 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Injector balance in split screen: the conditions on top, then the five
+     cylinders as bars centred on zero. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:orientation="vertical"
-    android:padding="6dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <TextView
         android:id="@+id/tvConditions"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="6dp"
         android:background="@drawable/card"
         android:letterSpacing="0.04"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:text="@string/inj_waiting"
         android:textColor="@color/labelTertiary"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:textStyle="bold" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gPOWER_BALANCE_1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-15"
-                app:gaugeMax="15"
-                app:gaugeDecimals="1"
-                app:gaugeCaption="INJ 1" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gPOWER_BALANCE_2"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-15"
-                app:gaugeMax="15"
-                app:gaugeDecimals="1"
-                app:gaugeCaption="INJ 2" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gPOWER_BALANCE_3"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-15"
-                app:gaugeMax="15"
-                app:gaugeDecimals="1"
-                app:gaugeCaption="INJ 3" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gPOWER_BALANCE_4"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-15"
-                app:gaugeMax="15"
-                app:gaugeDecimals="1"
-                app:gaugeCaption="INJ 4" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gPOWER_BALANCE_5"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-15"
-                app:gaugeMax="15"
-                app:gaugeDecimals="1"
-                app:gaugeCaption="INJ 5" />
-        </LinearLayout>
+
+    <include layout="@layout/injector_bars" />
 </LinearLayout>

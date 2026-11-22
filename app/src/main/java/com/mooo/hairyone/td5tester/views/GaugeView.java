@@ -82,11 +82,11 @@ public class GaugeView extends View {
     private String infoBody = null;
 
     private float coldBelow = Float.NEGATIVE_INFINITY;
-    private float alertBelow = Float.NEGATIVE_INFINITY;
-    private float warnBelow = Float.NEGATIVE_INFINITY;
+    protected float alertBelow = Float.NEGATIVE_INFINITY;
+    protected float warnBelow = Float.NEGATIVE_INFINITY;
     protected float warnAbove = Float.POSITIVE_INFINITY;
     protected float alertAbove = Float.POSITIVE_INFINITY;
-    private Float origin = null;
+    protected Float origin = null;
 
     protected int neutralColor, coldColor, warnColor, alertColor, surfaceColor, trackColor;
 

@@ -104,6 +104,12 @@
     <string name="maf_reset">Remettre à zéro</string>
     <string name="maf_reset_title">Remettre l’historique à zéro ?</string>
     <string name="maf_reset_body">À faire après le remplacement du débitmètre : les mesures des anciens trajets seront effacées.</string>
+    <string name="sec_fuelling">GASOIL — PAR INJECTION</string>
+    <string name="sec_air">AIR ET RALENTI</string>
+    <string name="sec_pedal">PÉDALE</string>
+    <string name="sec_temps">TEMPÉRATURES ET PRESSION</string>
+    <string name="sec_injectors">BALANCE DES INJECTEURS</string>
+    <string name="sec_conditions">CONDITIONS DE MESURE</string>
     <string name="trip">Trajet</string>
     <string name="total">Total</string>
     <string name="total_reset_title">Remettre le total à zéro ?</string>

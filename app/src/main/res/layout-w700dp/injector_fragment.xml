@@ -1,95 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Injector balance on a wide screen: the five cylinders as bars centred
+     on zero on the left, the conditions and how to read them on the right. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.7"
+        android:layout_marginEnd="32dp"
+        android:orientation="vertical">
 
-        <com.mooo.hairyone.td5tester.views.GaugeView
-            android:id="@+id/gPOWER_BALANCE_1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            app:gaugeMin="-15"
-            app:gaugeMax="15"
-            app:gaugeDecimals="1"
-            app:gaugeCaption="INJ 1" />
+        <TextView
+            style="@style/ClusterSection"
+            android:text="@string/sec_injectors" />
 
-        <com.mooo.hairyone.td5tester.views.GaugeView
-            android:id="@+id/gPOWER_BALANCE_2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            app:gaugeMin="-15"
-            app:gaugeMax="15"
-            app:gaugeDecimals="1"
-            app:gaugeCaption="INJ 2" />
-
-        <com.mooo.hairyone.td5tester.views.GaugeView
-            android:id="@+id/gPOWER_BALANCE_3"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            app:gaugeMin="-15"
-            app:gaugeMax="15"
-            app:gaugeDecimals="1"
-            app:gaugeCaption="INJ 3" />
-
-        <com.mooo.hairyone.td5tester.views.GaugeView
-            android:id="@+id/gPOWER_BALANCE_4"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            app:gaugeMin="-15"
-            app:gaugeMax="15"
-            app:gaugeDecimals="1"
-            app:gaugeCaption="INJ 4" />
-
-        <com.mooo.hairyone.td5tester.views.GaugeView
-            android:id="@+id/gPOWER_BALANCE_5"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="5dp"
-            app:gaugeMin="-15"
-            app:gaugeMax="15"
-            app:gaugeDecimals="1"
-            app:gaugeCaption="INJ 5" />
+        <include layout="@layout/injector_bars" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="@drawable/card"
-        android:orientation="vertical"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/ClusterSection"
+            android:text="@string/sec_conditions" />
 
         <TextView
             android:id="@+id/tvConditions"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-                        android:letterSpacing="0.06"
+            android:background="@drawable/card"
+            android:letterSpacing="0.04"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:text="@string/inj_waiting"
             android:textColor="@color/labelTertiary"
             android:textSize="12sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="@string/injector_hint_title"
+            android:textColor="@color/labelSecondary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/injector_hint_body"
+            android:textColor="@color/labelTertiary"
+            android:textSize="13sp" />
     </LinearLayout>
 </LinearLayout>

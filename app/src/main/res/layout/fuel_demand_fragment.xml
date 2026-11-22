@@ -1,122 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Expert: the fuelling figures on the left, all on the same mg scale so
+     they compare at a glance, and the air on the right. One layout for every
+     width: the bars scale to the room they get. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg"
-    android:orientation="vertical"
-    android:padding="6dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gDRIVER_DEMAND"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="60"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="PÉDALE" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gTORQUE_LIMIT"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="60"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="LIMIT COUPLE" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gSMOKE_LIMIT"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="60"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="LIMIT FUMÉE" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gINJECTION_QUANTITY"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="60"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="QTÉ INJECTÉE" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gIDLE_DEMAND"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="-20"
-                app:gaugeMax="20"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="TR/MIN"
-                app:gaugeCaption="RALENTI" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gMAF_AIR_MASS"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="800"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="MAF" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gMAP_AIR_MASS"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="900"
-                app:gaugeDecimals="0"
-                app:gaugeUnit="MG"
-                app:gaugeCaption="MAP" />
-            <com.mooo.hairyone.td5tester.views.GaugeView
-                android:id="@+id/gAF_RATIO"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="4dp"
-                app:gaugeMin="0"
-                app:gaugeMax="30"
-                app:gaugeDecimals="1"
-                app:gaugeUnit="AFR"
-                app:gaugeCaption="RAPPORT A/F" />
-        </LinearLayout>
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginEnd="28dp"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/ClusterSection"
+            android:text="@string/sec_fuelling" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gDRIVER_DEMAND"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="60"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Demande pédale" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gTORQUE_LIMIT"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="60"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Limiteur de couple" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gSMOKE_LIMIT"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="60"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Limiteur de fumée" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gINJECTION_QUANTITY"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="60"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Quantité injectée" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/ClusterSection"
+            android:text="@string/sec_air" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gMAF_AIR_MASS"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="800"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Air au débitmètre (MAF)" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gMAP_AIR_MASS"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="900"
+            app:gaugeUnit="mg"
+            app:gaugeCaption="Air au collecteur (MAP)" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gAF_RATIO"
+            style="@style/ClusterBar"
+            app:gaugeMin="0"
+            app:gaugeMax="30"
+            app:gaugeDecimals="1"
+            app:gaugeUnit=": 1"
+            app:gaugeCaption="Rapport air / gasoil" />
+
+        <com.mooo.hairyone.td5tester.views.BarGaugeView
+            android:id="@+id/gIDLE_DEMAND"
+            style="@style/ClusterBar"
+            app:gaugeMin="-20"
+            app:gaugeMax="20"
+            app:gaugeUnit="tr/min"
+            app:gaugeCaption="Écart de ralenti" />
+    </LinearLayout>
 </LinearLayout>
