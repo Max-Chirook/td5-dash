@@ -99,6 +99,7 @@ public class DashboardFragment extends BaseFragment {
         gRPM.resetPeak();
         gTURBO.resetPeak();
         gCOOLANT.resetPeak();
+        gAIRFLOW.resetPeak();
         battery.reset();
         gVOLT.setFootnote(null);
         trip.reset();
@@ -204,6 +205,7 @@ public class DashboardFragment extends BaseFragment {
         gRPM.trackPeak();
         gTURBO.trackPeak();
         gCOOLANT.trackPeak();
+        gAIRFLOW.trackPeak();
 
         applyBands();
 

@@ -59,6 +59,47 @@
                 android:orientation="horizontal">
 
                 <com.mooo.hairyone.td5tester.views.GaugeView
+                    android:id="@+id/gVOLT"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    app:gaugeMin="10"
+                    app:gaugeMax="16"
+                    app:gaugeDecimals="1"
+                    app:gaugeUnit="VOLT"
+                    app:gaugeCaption="BATTERIE" />
+
+                <com.mooo.hairyone.td5tester.views.GaugeView
+                    android:id="@+id/gCOOLANT"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    app:gaugeMin="0"
+                    app:gaugeMax="130"
+                    app:gaugeUnit="°C"
+                    app:gaugeCaption="T° MOTEUR" />
+
+                <com.mooo.hairyone.td5tester.views.GaugeView
+                    android:id="@+id/gAIRFLOW"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp"
+                    app:gaugeMin="0"
+                    app:gaugeMax="700"
+                    app:gaugeUnit="KG/H"
+                    app:gaugeCaption="DÉBITMÈTRE" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <com.mooo.hairyone.td5tester.views.GaugeView
                     android:id="@+id/gTURBO"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -81,47 +122,6 @@
                     app:gaugeDecimals="1"
                     app:gaugeUnit="L/100 KM"
                     app:gaugeCaption="CONSO" />
-
-                <com.mooo.hairyone.td5tester.views.GaugeView
-                    android:id="@+id/gCOOLANT"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_margin="5dp"
-                    app:gaugeMin="0"
-                    app:gaugeMax="130"
-                    app:gaugeUnit="°C"
-                    app:gaugeCaption="T° MOTEUR" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <com.mooo.hairyone.td5tester.views.GaugeView
-                    android:id="@+id/gAIRFLOW"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_margin="5dp"
-                    app:gaugeMin="0"
-                    app:gaugeMax="700"
-                    app:gaugeUnit="KG/H"
-                    app:gaugeCaption="DÉBITMÈTRE" />
-
-                <com.mooo.hairyone.td5tester.views.GaugeView
-                    android:id="@+id/gVOLT"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_margin="5dp"
-                    app:gaugeMin="10"
-                    app:gaugeMax="16"
-                    app:gaugeDecimals="1"
-                    app:gaugeUnit="VOLT"
-                    app:gaugeCaption="BATTERIE" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
