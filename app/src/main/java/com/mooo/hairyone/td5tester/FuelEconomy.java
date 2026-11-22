@@ -34,6 +34,13 @@ public final class FuelEconomy {
         lastMs = -1;
     }
 
+    /** Puts back what was saved, for the long-term total. */
+    public void restore(double litres, double km) {
+        this.litres = Math.max(0, litres);
+        this.km = Math.max(0, km);
+        lastMs = -1;
+    }
+
     public double litres() { return litres; }
 
     public double km() { return km; }

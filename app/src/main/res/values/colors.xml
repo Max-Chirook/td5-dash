@@ -21,6 +21,8 @@
     <color name="stateWarn">#FFD60A</color>
     <color name="stateHigh">#FF9F0A</color>
     <color name="stateAlert">#FF453A</color>
+    <!-- The long-term total, kept apart from the state colours. -->
+    <color name="stateTotal">#A99CFF</color>
     <color name="stateIdle">#48484A</color>
     <color name="gaugeNeutral">#F2F2F7</color>
     <color name="track">#2A2A2C</color>

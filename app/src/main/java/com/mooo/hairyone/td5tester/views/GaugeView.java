@@ -248,6 +248,18 @@ public class GaugeView extends View {
     /** A small grey line under the caption, the same as the "max" line of the other gauges. */
     public void setFootnote(String footnote) { this.footnote = footnote; invalidate(); }
 
+    // The colour of that line, when it says something other than the trip
+    // (the long-term total). 0 keeps the usual grey.
+    private int footColor = 0;
+
+    public void setFootColor(int color) {
+        if (footColor == color) return;
+        footColor = color;
+        invalidate();
+    }
+
+    protected int footColor(int fallback) { return footColor != 0 ? footColor : fallback; }
+
     public int getState() {
         if (!hasValue) return STATE_NORMAL;
         if (targetValue >= alertAbove || targetValue <= alertBelow) return STATE_ALERT;
@@ -380,7 +392,7 @@ public class GaugeView extends View {
             if (showPeak) {
                 captionPaint.setTextSize(captionSize * 0.82f);
                 captionPaint.setLetterSpacing(0.02f);
-                captionPaint.setColor(ContextCompat.getColor(getContext(), R.color.labelTertiary));
+                captionPaint.setColor(footColor(ContextCompat.getColor(getContext(), R.color.labelTertiary)));
                 canvas.drawText(footText, cx, baseline + captionSize * 1.35f, captionPaint);
             }
         }

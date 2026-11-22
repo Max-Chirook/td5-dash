@@ -6,19 +6,24 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mooo.hairyone.td5tester.Conversions;
-import com.mooo.hairyone.td5tester.FuelEconomy;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
-import com.mooo.hairyone.td5tester.RunningStats;
 import com.mooo.hairyone.td5tester.Settings;
+import com.mooo.hairyone.td5tester.Totals;
+import com.mooo.hairyone.td5tester.TripComputer;
 import com.mooo.hairyone.td5tester.events.ConnectedEvent;
 import com.mooo.hairyone.td5tester.events.DashboardEvent;
 import com.mooo.hairyone.td5tester.views.GaugeInfoSheet;
 import com.mooo.hairyone.td5tester.views.GaugeView;
+import com.mooo.hairyone.td5tester.views.ReadoutView;
 
 import org.apache.log4j.Logger;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class DashboardFragment extends BaseFragment {
 
@@ -26,6 +31,8 @@ public class DashboardFragment extends BaseFragment {
 
     GaugeView gRPM, gVOLT, gTURBO, gCOOLANT, gAIRFLOW, gFUEL;
     TextView tvWarmup;
+    // The trip / total switch; only the wide layout has it.
+    TextView tvTrip, tvTotal;
 
     // Below this the engine is still coming up to temperature; the strip is
     // hidden once there, so a clean screen means nothing needs saying.
@@ -38,17 +45,14 @@ public class DashboardFragment extends BaseFragment {
     private float ambientPressureKpa = Float.NaN;
     private float manifoldPressureKpa = Float.NaN;
 
-    // Mean battery voltage since the connection, shown under the reading.
-    // Process-wide, so a split-screen rebuild does not start it over.
-    private static final RunningStats battery = new RunningStats();
-
     // Fuel economy comes from the injected quantity, the engine speed and the
     // road speed, all three read on every pass.
     private float rpm = Float.NaN;
     private float kmh = Float.NaN;
-    private static final FuelEconomy trip = new FuelEconomy();
 
     public DashboardFragment() { /* Required empty public constructor */ }
+
+    private TripComputer computer() { return TripComputer.get(requireContext()); }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDashboardEvent(DashboardEvent event) {
@@ -63,10 +67,6 @@ public class DashboardFragment extends BaseFragment {
                 break;
             case BATTERY_VOLTAGE:
                 gVOLT.setValue(value);
-                battery.add(value);
-                if (!battery.isEmpty()) {
-                    gVOLT.setFootnote(String.format("moy. %.1f", battery.mean()));
-                }
                 break;
             case COOLANT_TEMP:
                 gCOOLANT.setValue(value);
@@ -90,21 +90,17 @@ public class DashboardFragment extends BaseFragment {
                 manifoldPressureKpa = value;
                 updateBoost();
                 break;
+            default:
+                return;
         }
+        showFeet();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onConnectedEvent(ConnectedEvent event) {
-        // A new connection is a new trip, so the session peaks start over.
-        gRPM.resetPeak();
-        gTURBO.resetPeak();
-        gCOOLANT.resetPeak();
-        gAIRFLOW.resetPeak();
-        battery.reset();
-        gVOLT.setFootnote(null);
-        trip.reset();
-        showTripAverage();
+        // The trip computer has started a new trip; show it from zero.
         warmAnnounced = false;
+        showFeet();
     }
 
     /**
@@ -113,7 +109,6 @@ public class DashboardFragment extends BaseFragment {
      */
     private void updateFuel(float mgPerStroke) {
         double perHour = Conversions.fuelLitresPerHour(mgPerStroke, rpm, s("fuel_correction"));
-        trip.update(perHour, kmh, android.os.SystemClock.elapsedRealtime());
         double per100 = Conversions.litresPer100Km(perHour, kmh);
         if (Conversions.isNoReading(per100)) {
             gFUEL.setUnit(getString(R.string.unit_l_per_hour));
@@ -122,14 +117,69 @@ public class DashboardFragment extends BaseFragment {
             gFUEL.setUnit(getString(R.string.unit_l_per_100));
             gFUEL.setValue((float) per100);
         }
-        showTripAverage();
     }
 
-    private void showTripAverage() {
-        double avg = trip.averagePer100Km();
-        // A dash until the first kilometre, so the caption sits at the same
-        // height as its neighbours from the start.
+    /**
+     * The grey lines under the readings: this trip, or the long-term total in
+     * violet, so the two are never mistaken for one another.
+     */
+    private void showFeet() {
+        if (gRPM == null || getContext() == null) return;
+        boolean total = TripComputer.showTotal;
+        Totals t = total ? computer().total() : computer().trip();
+        int color = total ? getResources().getColor(R.color.stateTotal) : 0;
+
+        foot(gRPM, "max %.0f", t.rpmMax(), color);
+        foot(gTURBO, "max %.2f", t.boostMax(), color);
+        foot(gCOOLANT, "max %.0f", t.coolantMax(), color);
+        foot(gAIRFLOW, "max %.0f", t.airflowMax(), color);
+        foot(gVOLT, "moy. %.1f", t.batteryMean(), color);
+
+        // A dash until the first kilometre, so the line is there from the start.
+        double avg = t.fuelAverage();
         gFUEL.setFootnote(Double.isNaN(avg) ? "moy. —" : String.format("moy. %.1f L/100", avg));
+        gFUEL.setFootColor(color);
+        if (gFUEL instanceof ReadoutView) ((ReadoutView) gFUEL).setExtra(distance(t, total));
+
+        if (tvTrip != null) {
+            tvTrip.setBackgroundResource(total ? 0 : R.drawable.toggle_trip_on);
+            tvTrip.setTextColor(getResources().getColor(total ? R.color.labelSecondary : R.color.label));
+            tvTotal.setBackgroundResource(total ? R.drawable.toggle_total_on : 0);
+            tvTotal.setTextColor(getResources().getColor(total ? R.color.stateTotal : R.color.labelSecondary));
+        }
+    }
+
+    private static void foot(GaugeView gauge, String format, float value, int color) {
+        String dash = format.substring(0, format.indexOf('%')) + "—";
+        gauge.setFootnote(Float.isNaN(value) ? dash : String.format(format, value));
+        gauge.setFootColor(color);
+    }
+
+    private static String distance(Totals t, boolean total) {
+        double km = t.km();
+        String figure = km < 10
+                ? String.format(Locale.ROOT, "%.1f km", km)
+                : String.format(Locale.FRANCE, "%,.0f km", km);
+        if (!total) return figure;
+        String since = new SimpleDateFormat("dd/MM/yy", Locale.FRANCE).format(new Date(t.sinceMs()));
+        return figure + " depuis le " + since;
+    }
+
+    private void setShowTotal(boolean total) {
+        TripComputer.showTotal = total;
+        showFeet();
+    }
+
+    private void confirmResetTotal() {
+        new android.app.AlertDialog.Builder(requireContext(), R.style.InfoDialog)
+                .setTitle(R.string.total_reset_title)
+                .setMessage(R.string.total_reset_body)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.total_reset_confirm, (d, w) -> {
+                    computer().resetTotal();
+                    showFeet();
+                })
+                .show();
     }
 
     private void updateWarmup(float celsius) {
@@ -176,7 +226,17 @@ public class DashboardFragment extends BaseFragment {
 
     @Override public void onResume() {
         super.onResume();
-        if (gRPM != null) applyBands();
+        if (gRPM != null) {
+            applyBands();
+            showFeet();
+        }
+    }
+
+    @Override public void onPause() {
+        // The total is also saved every 30 s while reading; this covers the
+        // app being closed in between.
+        computer().save();
+        super.onPause();
     }
 
     private void updateBoost() {
@@ -194,20 +254,27 @@ public class DashboardFragment extends BaseFragment {
         gAIRFLOW = view.findViewById(R.id.gAIRFLOW);
         gFUEL = view.findViewById(R.id.gFUEL);
         tvWarmup = view.findViewById(R.id.tvWarmup);
+        tvTrip = view.findViewById(R.id.tvTrip);
+        tvTotal = view.findViewById(R.id.tvTotal);
 
-        showTripAverage();
-        if (!battery.isEmpty()) gVOLT.setFootnote(String.format("moy. %.1f", battery.mean()));
+        if (tvTrip != null) {
+            tvTrip.setOnClickListener(v -> setShowTotal(false));
+            tvTotal.setOnClickListener(v -> setShowTotal(true));
+            // Resetting the total needs a long press and a confirmation, so
+            // months of figures are never lost to a stray touch.
+            tvTotal.setOnLongClickListener(v -> {
+                setShowTotal(true);
+                confirmResetTotal();
+                return true;
+            });
+        }
 
         // Read in turn with the other slow values, not on every pass.
         gCOOLANT.setStaleAfter(GaugeView.STALE_SLOW_MS);
         gVOLT.setStaleAfter(GaugeView.STALE_SLOW_MS);
 
-        gRPM.trackPeak();
-        gTURBO.trackPeak();
-        gCOOLANT.trackPeak();
-        gAIRFLOW.trackPeak();
-
         applyBands();
+        showFeet();
 
         gRPM.setInfo(getString(R.string.t_rpm), getString(R.string.i_rpm));
         gTURBO.setInfo(getString(R.string.t_turbo), getString(R.string.i_turbo));

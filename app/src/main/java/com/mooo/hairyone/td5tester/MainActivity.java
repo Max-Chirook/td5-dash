@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Created now, so it watches the cable from the start.
         EcuSession.get(this);
+        // Follows the readings from the start, whichever tab is showing.
+        TripComputer.get(this);
 
         setContentView(R.layout.activity_main);
 

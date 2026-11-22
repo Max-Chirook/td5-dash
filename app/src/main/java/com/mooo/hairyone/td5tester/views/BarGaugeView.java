@@ -82,7 +82,7 @@ public class BarGaugeView extends GaugeView {
         if (foot != null) {
             label.setTextSize(13f * s);
             label.setLetterSpacing(0.02f);
-            label.setColor(stale ? warnColor : color(R.color.labelTertiary));
+            label.setColor(stale ? warnColor : footColor(color(R.color.labelTertiary)));
             canvas.drawText(foot, left, 76f * s, label);
         }
     }

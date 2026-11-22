@@ -13,22 +13,54 @@
     android:paddingTop="6dp"
     android:paddingBottom="8dp">
 
-    <TextView
-        android:id="@+id/tvWarmup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/card"
-        android:letterSpacing="0.04"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="34dp">
+
+        <TextView
+            android:id="@+id/tvWarmup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/card"
+            android:letterSpacing="0.04"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
+
+        <!-- Trip or long-term total in the grey lines; a long press on
+             "Total" offers to reset it. -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_gravity="end|center_vertical"
+            android:background="@drawable/toggle_track"
+            android:orientation="horizontal"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/tvTrip"
+                android:layout_width="76dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/trip"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvTotal"
+                android:layout_width="76dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/total"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

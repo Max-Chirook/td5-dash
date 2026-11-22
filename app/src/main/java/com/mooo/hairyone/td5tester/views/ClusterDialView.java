@@ -142,7 +142,7 @@ public class ClusterDialView extends GaugeView {
 
         String foot = footText();
         if (foot != null) {
-            small.setColor(color(R.color.labelSecondary));
+            small.setColor(footColor(color(R.color.labelSecondary)));
             small.setTextSize(r * 0.085f);
             small.setLetterSpacing(0.02f);
             canvas.drawText(foot, cx, cy + r * 0.88f, small);

@@ -81,6 +81,11 @@
     <string name="clear_faults_body">Les codes défaut enregistrés par le calculateur seront supprimés. Cette action est irréversible : note-les avant si tu veux les garder.</string>
     <string name="clear_faults_confirm">Effacer</string>
     <string name="cancel">Annuler</string>
+    <string name="trip">Trajet</string>
+    <string name="total">Total</string>
+    <string name="total_reset_title">Remettre le total à zéro ?</string>
+    <string name="total_reset_body">Les max, moyennes, kilomètres et litres cumulés depuis la dernière remise à zéro seront effacés. Le trajet en cours n’est pas touché.</string>
+    <string name="total_reset_confirm">Remettre à zéro</string>
     <string name="tab_tests">TESTS</string>
     <string name="tab_graph">GRAPHIQUE</string>
     <string name="graph_min">MIN</string>

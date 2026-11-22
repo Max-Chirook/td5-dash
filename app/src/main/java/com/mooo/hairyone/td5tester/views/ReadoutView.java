@@ -75,8 +75,24 @@ public class ReadoutView extends GaugeView {
         if (foot != null) {
             small.setTextSize(14f * s);
             small.setLetterSpacing(0.02f);
-            small.setColor(stale ? warnColor : color(R.color.labelSecondary));
+            small.setColor(stale ? warnColor : footColor(color(R.color.labelSecondary)));
             canvas.drawText(foot, cx, base + 72f * s, small);
         }
+
+        if (extra != null && hasValue && !stale) {
+            small.setTextSize(13f * s);
+            small.setLetterSpacing(0.02f);
+            small.setColor(footColor(color(R.color.labelTertiary)));
+            canvas.drawText(extra, cx, base + 94f * s, small);
+        }
+    }
+
+    private String extra = null;
+
+    /** A second grey line under the first, for the distance. */
+    public void setExtra(String extra) {
+        if (extra == null ? this.extra == null : extra.equals(this.extra)) return;
+        this.extra = extra;
+        invalidate();
     }
 }
