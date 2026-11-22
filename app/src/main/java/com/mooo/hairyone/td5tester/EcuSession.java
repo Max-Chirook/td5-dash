@@ -523,7 +523,7 @@ public final class EcuSession {
                         // Unsigned: a signed byte would turn 130 km/h into -126.
                         logRecord.VehicleSpeed = (short) (mReadBuffer[3] & 0xFF);
 
-                        EventBus.getDefault().post(new DashboardEvent(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, logRecord.VehicleSpeed ));
+                        EventBus.getDefault().post(new DashboardEvent(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, realSpeed(logRecord.VehicleSpeed)));
                         pid_count++;
                     }
                     if (mDashboardRunning && due.contains(Requests.RequestPidEnum.TEMPERATURES) && get_pid(Requests.RequestPidEnum.TEMPERATURES)) {
@@ -651,7 +651,7 @@ public final class EcuSession {
         double load = Math.pow(wave, 2);
 
         post(DashboardEvent.DATA_TYPE.RPM, 760 + load * 3400);
-        post(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, load * 110);
+        post(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, realSpeed(load * 110));
         post(DashboardEvent.DATA_TYPE.BATTERY_VOLTAGE, 13.9 + wave * 0.7);
         // The demo starts cold and warms up, so the warm-up strip can be seen.
         double warmup = Math.min(1.0, simulationPhase / 9.0);
@@ -679,6 +679,14 @@ public final class EcuSession {
         post(DashboardEvent.DATA_TYPE.POWER_BALANCE_3, 1 + Math.sin(simulationPhase * 2.1));
         post(DashboardEvent.DATA_TYPE.POWER_BALANCE_4, Math.sin(simulationPhase * 0.9));
         post(DashboardEvent.DATA_TYPE.POWER_BALANCE_5, Math.sin(simulationPhase * 1.1));
+    }
+
+    /**
+     * The speed every screen sees, already corrected for the tyres, so the
+     * speed, the L/100 km and the distances all agree with the road.
+     */
+    private double realSpeed(double ecuKmh) {
+        return Conversions.realSpeed(ecuKmh, Settings.get(context, "speed_read"), Settings.get(context, "speed_real"));
     }
 
     private void post(DashboardEvent.DATA_TYPE type, double value) {

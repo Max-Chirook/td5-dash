@@ -36,6 +36,7 @@ public final class Settings {
     private static final String INJ = "Injecteurs";
     private static final String PEDAL = "Pédale";
     private static final String COND = "Conditions de mesure";
+    private static final String SPEED = "Vitesse";
     private static final String FUEL = "Consommation";
 
     public static final List<Entry> ENTRIES = new ArrayList<>();
@@ -75,6 +76,11 @@ public final class Settings {
         add("track_warn_high", PEDAL, "Voie — orange au-dessus de", "V", 4.3f);
         add("track_alert_high", PEDAL, "Voie — rouge au-dessus de", "V", 4.6f);
         add("pedal_full_mg", PEDAL, "Pédale au plancher — demande Expert", "mg", 50);
+
+        // Two readings taken together, the same as a GPS check: what the
+        // speedometer shows, and the true speed at that moment.
+        add("speed_read", SPEED, "Vitesse lue au compteur", "km/h", 100);
+        add("speed_real", SPEED, "Vitesse réelle (GPS) au même moment", "km/h", 100);
 
         add("fuel_correction", FUEL, "Correction de la consommation", "%", 100);
 

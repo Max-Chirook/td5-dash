@@ -58,6 +58,16 @@ public final class Conversions {
         return Math.max(0.0, Math.min(100.0, percent));
     }
 
+    /**
+     * Road speed corrected for non-standard tyres: readKmh on the speedometer
+     * is realKmh by GPS, for instance 120 read for 130 real. Either value
+     * missing or not positive leaves the speed as the ECU gives it.
+     */
+    public static double realSpeed(double ecuKmh, double readKmh, double realKmh) {
+        if (isNoReading(ecuKmh) || !(readKmh > 0) || !(realKmh > 0)) return ecuKmh;
+        return ecuKmh * realKmh / readKmh;
+    }
+
     /** Diesel density at about 15 °C, in kg/L. */
     public static final double DIESEL_KG_PER_L = 0.835;
     /** Below this the vehicle counts as stopped and the economy is given per hour. */

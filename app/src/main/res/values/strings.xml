@@ -32,7 +32,7 @@
     <string name="close">Fermer</string>
 
     <string name="t_rpm">Régime moteur</string>
-    <string name="i_rpm">Ralenti à 740 tr/min en boîte mécanique, 760 en automatique. Le régime est limité à 5000 tr/min. La vitesse est rappelée sous le régime.</string>
+    <string name="i_rpm">Ralenti à 740 tr/min en boîte mécanique, 760 en automatique. Le régime est limité à 5000 tr/min. La vitesse est rappelée sous le régime.\n\nSi tes pneus faussent le compteur, règle Réglages, section Vitesse : note la vitesse du compteur et celle d\'un GPS au même moment, par exemple 120 et 130. La vitesse, la conso aux 100 km et les kilomètres en tiennent compte.</string>
     <string name="t_turbo">Pression de turbo</string>
     <string name="i_turbo">En configuration d\'origine la pression maximale tourne autour de 1,1 à 1,2 bar, et la coupure se fait à 1,42 bar. Avec une boost box, compte plutôt 0,8 bar au maximum.\n\nLa valeur est calculée à partir de la pression du collecteur moins la pression ambiante mesurée, donc elle reste juste quelle que soit l\'altitude.</string>
     <string name="t_coolant">Température moteur (liquide de refroidissement)</string>
