@@ -30,8 +30,8 @@
         <item name="colorAccent">@color/inkStrong</item>
         <item name="colorControlNormal">@color/labelSecondary</item>
         <item name="android:windowTitleStyle">@style/DialogTitle</item>
-        <item name="android:windowMinWidthMajor">52%</item>
-        <item name="android:windowMinWidthMinor">52%</item>
+        <item name="android:windowMinWidthMajor">@dimen/dialog_major</item>
+        <item name="android:windowMinWidthMinor">@dimen/dialog_minor</item>
     </style>
 
 

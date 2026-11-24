@@ -674,10 +674,18 @@ public final class EcuSession {
         post(DashboardEvent.DATA_TYPE.ACC_TRACK_2, 0.7 + load * 3.6);
         post(DashboardEvent.DATA_TYPE.ACC_TRACK_3, 0.7 + load * 3.6);
         post(DashboardEvent.DATA_TYPE.ACC_SUPPLY, load * 10);
-        post(DashboardEvent.DATA_TYPE.DRIVER_DEMAND, load * 48);
-        post(DashboardEvent.DATA_TYPE.TORQUE_LIMIT, 40 + load * 12);
-        post(DashboardEvent.DATA_TYPE.SMOKE_LIMIT, 29 + load * 18);
-        post(DashboardEvent.DATA_TYPE.INJECTION_QUANTITY, 5 + load * 42);
+        // The smoke limit follows the air, which lags behind the pedal while
+        // the turbo spools up: on the way up the fuel is briefly held back,
+        // as on the vehicle. The ECU injects the lowest of the three.
+        double lagWave = (Math.sin(simulationPhase - 0.45) + 1) / 2;
+        double demand = load * 48;
+        double smoke = 26 + lagWave * lagWave * 24;
+        double torque = 40 + load * 12;
+        // Same order as the ECU's fuelling frame: the smoke limit comes last.
+        post(DashboardEvent.DATA_TYPE.DRIVER_DEMAND, demand);
+        post(DashboardEvent.DATA_TYPE.INJECTION_QUANTITY, Math.max(5, Math.min(demand, Math.min(smoke, torque))));
+        post(DashboardEvent.DATA_TYPE.TORQUE_LIMIT, torque);
+        post(DashboardEvent.DATA_TYPE.SMOKE_LIMIT, smoke);
         post(DashboardEvent.DATA_TYPE.IDLE_DEMAND, -4 + wave * 8);
         post(DashboardEvent.DATA_TYPE.MAF_AIR_MASS, 410 + load * 300);
         // The manifold estimate counts the EGR gas the air meter never sees:

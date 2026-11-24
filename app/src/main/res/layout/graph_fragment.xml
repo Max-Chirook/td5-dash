@@ -23,15 +23,16 @@
             android:layout_height="38dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="12dp">
+            android:paddingStart="10dp">
 
             <TextView
                 android:id="@+id/tvModeLive"
                 android:layout_width="wrap_content"
                 android:layout_height="26dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="16dp"
                 android:gravity="center"
-                android:letterSpacing="0.16"
+                android:letterSpacing="0.12"
+                android:singleLine="true"
                 android:text="@string/graph_live"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -41,7 +42,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="26dp"
                 android:gravity="center"
-                android:letterSpacing="0.16"
+                android:letterSpacing="0.12"
+                android:singleLine="true"
                 android:text="@string/graph_bilans"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -303,6 +305,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:letterSpacing="0.06"
                             android:textColor="@color/labelSecondary"
                             android:textSize="13sp"

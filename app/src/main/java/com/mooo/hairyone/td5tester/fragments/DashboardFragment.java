@@ -401,6 +401,8 @@ public class DashboardFragment extends BaseFragment {
 
         applyBands();
         showFeet();
+        // The gear badge is there from the start, so the centre does not jump.
+        if (gFUEL instanceof ReadoutView) ((ReadoutView) gFUEL).setGear(GearEstimator.label(computer().gear()));
 
         gRPM.setInfo(getString(R.string.t_rpm), getString(R.string.i_rpm));
         gTURBO.setInfo(getString(R.string.t_turbo), getString(R.string.i_turbo));

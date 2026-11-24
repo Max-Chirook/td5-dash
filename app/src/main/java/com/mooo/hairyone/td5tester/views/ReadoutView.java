@@ -86,7 +86,7 @@ public class ReadoutView extends GaugeView {
         small.setLetterSpacing(0.28f);
         small.setTypeface(TF_MEDIUM);
         small.setColor(grey);
-        if (caption != null) canvas.drawText(caption.toUpperCase(), cx, 15f * s, small);
+        if (caption != null) canvas.drawText(caption.toUpperCase(), cx, 11f * s, small);
         small.setTypeface(TF_REGULAR);
 
         float cy = 137f * s, r = 92f * s;
@@ -112,7 +112,7 @@ public class ReadoutView extends GaugeView {
             small.setTextSize(10.5f * s);
             small.setLetterSpacing(0f);
             small.setColor(ink);
-            float lr = r + 22 * s;
+            float lr = r + 16 * s;
             canvas.drawText("moy.", cx + (float) (lr * Math.cos(a)), cy + (float) (lr * Math.sin(a)) + 4 * s, small);
         }
         small.setTextSize(11f * s);

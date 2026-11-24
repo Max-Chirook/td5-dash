@@ -466,7 +466,8 @@ public class GraphFragment extends BaseFragment {
                 return new String[]{DashboardSheets.signedPercent(d), "" + (d >= -5 ? good : d >= -10 ? orange : red)};
             }
             case LIMITERS: {
-                long ms = tc.limiters(total).smokeMs() + tc.limiters(total).torqueMs();
+                // The limiter screen speaks of the trip, so its conclusion does too.
+                long ms = tc.limiters(false).smokeMs() + tc.limiters(false).torqueMs();
                 return new String[]{Limiters.duration(ms) + " bridé", "" + (ms > 0 ? orange : good)};
             }
             default: {
@@ -573,14 +574,17 @@ public class GraphFragment extends BaseFragment {
         barChart.setDecimals(1);
         barChart.setEmptyText(getString(R.string.bilan_empty));
         barChart.setData(labels, subs, values, colors);
-        barChart.setAverage(t.fuelAverage());
+        // The average of the same driving (moving, from 5 km/h), so the bars
+        // compare with it fairly; idling would otherwise lift it.
+        double moving = f.totalKm() >= FuelBreakdown.MIN_KM ? f.totalLitres() / f.totalKm() * 100 : Double.NaN;
+        barChart.setAverage(moving);
         barChart.setTitle("L/100 KM SELON LA VITESSE (KM/H)");
         if (best < 0) header("—", color(R.color.ink), "pas encore assez de route");
         else header(FuelBreakdown.SPEED_LABELS[best], color(R.color.good), "km/h · LA PLUS SOBRE");
         stats(new String[][]{
-                {"MOYENNE", Double.isNaN(t.fuelAverage()) ? "—" : String.format("%.1f L/100", t.fuelAverage())},
-                {"DISTANCE", String.format("%.0f km", t.km())},
-                {"GASOIL", String.format("%.1f L", t.litres())}});
+                {"MOYENNE EN ROULANT", Double.isNaN(moving) ? "—" : String.format("%.1f L/100", moving)},
+                {"DISTANCE", String.format("%.0f km", f.totalKm())},
+                {"GASOIL", String.format("%.1f L", f.totalLitres())}});
         tvBilanNote.setText(R.string.bilan_speed_note);
     }
 
@@ -603,7 +607,7 @@ public class GraphFragment extends BaseFragment {
         barChart.setEmptyText(getString(tc.gears().gearsSeen() == 0 ? R.string.bilan_learning : R.string.bilan_empty));
         barChart.setData(labels, subs, values, colors);
         barChart.setOutlined(current > 0 ? current - 1 : -1);
-        barChart.setAverage((bilanTotal ? tc.total() : tc.trip()).fuelAverage());
+        barChart.setAverage(f.totalKm() >= FuelBreakdown.MIN_KM ? f.totalLitres() / f.totalKm() * 100 : Double.NaN);
         barChart.setTitle("L/100 KM SELON LE RAPPORT ENGAGÉ");
         String now = "EN COURS : " + GearEstimator.label(current);
         if (best < 0) header("—", color(R.color.ink), now);
@@ -736,8 +740,11 @@ public class GraphFragment extends BaseFragment {
         int[][] thrColors = {{orange, red}, {orange}, {}, {orange}};
         String message = null;
         LinearLayout row = null;
+        // Two columns on a wide screen, one in split screen.
+        boolean narrow = getResources().getConfiguration().screenWidthDp < 700;
+        int perRow = narrow ? 1 : 2;
         for (int i = 0; i < 4; i++) {
-            if (i % 2 == 0) {
+            if (i % perRow == 0) {
                 row = new LinearLayout(c);
                 row.setOrientation(LinearLayout.HORIZONTAL);
                 llHealth.addView(row, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -756,13 +763,16 @@ public class GraphFragment extends BaseFragment {
 
             LinearLayout cell = new LinearLayout(c);
             cell.setOrientation(LinearLayout.VERTICAL);
-            cell.setPadding(i % 2 == 0 ? 0 : (int) (18 * d), (int) (6 * d), i % 2 == 0 ? (int) (18 * d) : 0, (int) (6 * d));
+            boolean leftCell = narrow || i % 2 == 0;
+            cell.setPadding(leftCell ? 0 : (int) (18 * d), (int) ((narrow ? 2 : 6) * d), leftCell && !narrow ? (int) (18 * d) : 0, (int) ((narrow ? 2 : 6) * d));
             LinearLayout top = new LinearLayout(c);
             top.setOrientation(LinearLayout.HORIZONTAL);
             TextView name = new TextView(c);
             name.setText(names[i]);
             name.setTextSize(13.5f);
             name.setTextColor(color(R.color.labelRow));
+            name.setSingleLine(true);
+            name.setEllipsize(TextUtils.TruncateAt.END);
             top.addView(name, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
             TextView v = new TextView(c);
             v.setText(verdict);
@@ -786,7 +796,11 @@ public class GraphFragment extends BaseFragment {
             unit.setTextColor(color(R.color.dim));
             fig.addView(big);
             fig.addView(unit);
-            body.addView(fig, new LinearLayout.LayoutParams((int) (92 * d), LinearLayout.LayoutParams.WRAP_CONTENT));
+            body.addView(fig, new LinearLayout.LayoutParams((int) ((narrow ? 80 : 92) * d), LinearLayout.LayoutParams.WRAP_CONTENT));
+            if (narrow) {
+                big.setTextSize(19f);
+                unit.setVisibility(View.GONE);
+            }
             TrendView trend = new TrendView(c);
             trend.setData(values, ranges[i][0], ranges[i][1], thr[i], thrColors[i], lc);
             body.addView(trend, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f));
@@ -859,6 +873,13 @@ public class GraphFragment extends BaseFragment {
         llHealth = view.findViewById(R.id.llHealth);
         barChart = view.findViewById(R.id.barChart);
         limiterChart = view.findViewById(R.id.limiterChart);
+
+        // In split screen the list gives the charts more room.
+        if (getResources().getConfiguration().screenWidthDp < 700) {
+            View panel = (View) svSignals.getParent();
+            panel.getLayoutParams().width = (int) (150 * density);
+            panel.requestLayout();
+        }
 
         tvMin = bindStat(view.findViewById(R.id.statMin), R.string.graph_min_caps);
         tvMax = bindStat(view.findViewById(R.id.statMax), R.string.graph_max_caps);

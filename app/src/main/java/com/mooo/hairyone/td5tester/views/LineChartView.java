@@ -50,6 +50,8 @@ public class LineChartView extends View {
     private int shaderColor = 0;
 
     private SignalHistory history;
+    /** Readings further apart than this are not joined. */
+    private static final long GAP_MS = 3000;
     private int decimals = 0;
     private long windowMs = 120_000;
     private String emptyText = "";
@@ -197,20 +199,30 @@ public class LineChartView extends View {
             labelPaint.setColor(dim);
         }
 
+        // A pause in the readings (stopped, for fuel economy) breaks the curve
+        // rather than drawing a straight line across it.
+        long gap = Math.max(GAP_MS, windowMs / 60);
         line.reset();
         fill.reset();
         float px = 0, py = 0;
         for (int i = first; i < n; i++) {
-            px = left + (right - left) * (history.timeAt(i) - from) / (float) windowMs;
-            py = toY(history.valueAt(i), yMin, yMax, top, bottom);
-            if (i == first) {
-                line.moveTo(px, py);
-                fill.moveTo(px, bottom);
-                fill.lineTo(px, py);
+            float x = left + (right - left) * (history.timeAt(i) - from) / (float) windowMs;
+            float y = toY(history.valueAt(i), yMin, yMax, top, bottom);
+            boolean broken = i > first && history.timeAt(i) - history.timeAt(i - 1) > gap;
+            if (i == first || broken) {
+                if (broken) {
+                    fill.lineTo(px, bottom);
+                    fill.close();
+                }
+                line.moveTo(x, y);
+                fill.moveTo(x, bottom);
+                fill.lineTo(x, y);
             } else {
-                line.lineTo(px, py);
-                fill.lineTo(px, py);
+                line.lineTo(x, y);
+                fill.lineTo(x, y);
             }
+            px = x;
+            py = y;
         }
         fill.lineTo(px, bottom);
         fill.close();
@@ -221,7 +233,7 @@ public class LineChartView extends View {
             for (int i = first; i < n; i++) {
                 float x = left + (right - left) * (history.timeAt(i) - from) / (float) windowMs;
                 float y = toY(history.valueAt(i), yMin, yMax, top, bottom);
-                if (i > first) {
+                if (i > first && history.timeAt(i) - history.timeAt(i - 1) <= gap) {
                     linePaint.setColor(colorizer.colorFor(history.valueAt(i - 1)));
                     canvas.drawLine(qx, qy, x, y, linePaint);
                 }
