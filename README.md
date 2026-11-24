@@ -140,7 +140,7 @@ câble est détecté.
 
 ## Installation
 
-Télécharger [l'APK](apk/td5-dash-v1.5.apk) et l'ouvrir sur l'autoradio. Les versions suivantes s'installent par-dessus, sans désinstaller.
+Télécharger [l'APK](apk/td5-dash-v1.6.apk) et l'ouvrir sur l'autoradio. Les versions suivantes s'installent par-dessus, sans désinstaller.
 Il faut autoriser l'installation depuis des sources inconnues.
 
 L'application s'installe **à côté** de TD5 InfoDash, avec son propre identifiant
