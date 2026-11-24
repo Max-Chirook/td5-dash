@@ -6,11 +6,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
+    android:background="@android:color/transparent"
     android:orientation="vertical"
     android:paddingStart="10dp"
     android:paddingEnd="10dp"
-    android:paddingTop="4dp"
+    android:paddingTop="2dp"
     android:paddingBottom="6dp">
 
     <FrameLayout
@@ -20,65 +20,73 @@
         <TextView
             android:id="@+id/tvRange"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
-            android:background="@drawable/toggle_track"
             android:gravity="center_vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingEnd="10dp"
             android:textColor="@color/labelSecondary"
             android:textSize="12sp"
-            tools:text="Autonomie   412 km  ·  38 L" />
+            tools:text="AUTONOMIE   281 km   72 L" />
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="match_parent"
             android:layout_gravity="end|center_vertical"
-            android:background="@drawable/toggle_track"
-            android:orientation="horizontal"
-            android:padding="3dp">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvTrip"
-                android:layout_width="62dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="14dp"
                 android:gravity="center"
-                android:text="@string/trip"
-                android:textSize="12sp" />
+                android:letterSpacing="0.16"
+                android:text="@string/trip_caps"
+                android:textSize="10.5sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvTotal"
-                android:layout_width="62dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
                 android:gravity="center"
-                android:text="@string/total"
-                android:textSize="12sp" />
+                android:letterSpacing="0.16"
+                android:text="@string/total_caps"
+                android:textSize="10.5sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Shown on its own line here: there is no room beside the switches. -->
+    <!-- On its own line here: there is no room beside the switches. -->
     <TextView
         android:id="@+id/tvWarmup"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="26dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/card"
-        android:letterSpacing="0.04"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:letterSpacing="0.06"
         android:paddingStart="14dp"
         android:paddingEnd="14dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
         android:textSize="11sp"
         android:textStyle="bold"
         android:visibility="gone"
         tools:visibility="visible"
         tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/hairline_fade" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:orientation="horizontal">
 
         <com.mooo.hairyone.td5tester.views.ClusterDialView
@@ -109,12 +117,12 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="4dp"
-        android:background="@color/surface" />
+        android:layout_marginBottom="6dp"
+        android:background="@drawable/hairline_fade" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="186dp"
+        android:layout_height="190dp"
         android:orientation="horizontal">
 
         <com.mooo.hairyone.td5tester.views.ReadoutView
@@ -126,13 +134,13 @@
             app:gaugeMax="30"
             app:gaugeDecimals="1"
             app:gaugeUnit="L/100 km"
-            app:gaugeCaption="Conso" />
+            app:gaugeCaption="Consommation" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
-            android:layout_marginStart="10dp"
+            android:layout_weight="1.4"
+            android:layout_marginStart="14dp"
             android:orientation="vertical">
 
             <com.mooo.hairyone.td5tester.views.BarGaugeView
@@ -154,7 +162,7 @@
                 app:gaugeMin="0"
                 app:gaugeMax="130"
                 app:gaugeUnit="°C"
-                app:gaugeCaption="T° moteur" />
+                app:gaugeCaption="Température moteur" />
 
             <com.mooo.hairyone.td5tester.views.BarGaugeView
                 android:id="@+id/gAIRFLOW"

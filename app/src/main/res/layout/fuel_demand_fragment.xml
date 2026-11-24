@@ -1,61 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Expert: the fuelling figures on the left, all on the same mg scale so
-     they compare at a glance, and the air on the right. One layout for every
-     width: the bars scale to the room they get. -->
+<!-- Expert: the fuel on one shared scale with a verdict on what limits it,
+     then the air coming in. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
+    android:background="@android:color/transparent"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginEnd="28dp"
         android:orientation="vertical">
 
+        <TextView style="@style/ClusterSection" android:text="@string/sec_fuel" />
+        <View style="@style/SectionRule" />
+
         <TextView
-            style="@style/ClusterSection"
-            android:text="@string/sec_fuelling" />
+            android:id="@+id/tvLimiter"
+            style="@style/Verdict"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="8dp"
+            tools:text="Libre : l’injecté suit ta demande" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gDRIVER_DEMAND"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="60"
             app:gaugeUnit="mg"
-            app:gaugeCaption="Demande pédale" />
+            app:gaugeCaption="Ta demande (pédale)" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gTORQUE_LIMIT"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
+            app:gaugeMarker="true"
             app:gaugeMin="0"
             app:gaugeMax="60"
             app:gaugeUnit="mg"
-            app:gaugeCaption="Limiteur de couple" />
+            app:gaugeCaption="Limite de couple" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gSMOKE_LIMIT"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
+            app:gaugeMarker="true"
             app:gaugeMin="0"
             app:gaugeMax="60"
             app:gaugeUnit="mg"
-            app:gaugeCaption="Limiteur de fumée" />
+            app:gaugeCaption="Limite de fumée" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gINJECTION_QUANTITY"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="60"
             app:gaugeUnit="mg"
             app:gaugeCaption="Quantité injectée" />
+
+        <TextView
+            style="@style/Hint"
+            android:layout_marginTop="4dp"
+            android:text="@string/fuel_scale_hint" />
     </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="26dp"
+        android:background="@color/hairline" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -63,29 +82,54 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <TextView style="@style/ClusterSection" android:text="@string/sec_air" />
+        <View style="@style/SectionRule" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal">
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gMAF_AIR_MASS"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="24dp"
+                app:gaugeTile="true"
+                app:gaugeMin="0"
+                app:gaugeMax="900"
+                app:gaugeUnit="mg"
+                app:gaugeCaption="Mesuré (débitmètre)" />
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gMAP_AIR_MASS"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:gaugeTile="true"
+                app:gaugeMin="0"
+                app:gaugeMax="900"
+                app:gaugeUnit="mg"
+                app:gaugeCaption="Calculé (collecteur)" />
+        </LinearLayout>
+
         <TextView
-            style="@style/ClusterSection"
-            android:text="@string/sec_air" />
+            android:id="@+id/tvAir"
+            style="@style/Verdict"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="10dp"
+            tools:text="Écart −3 % : bon état" />
 
-        <com.mooo.hairyone.td5tester.views.BarGaugeView
-            android:id="@+id/gMAF_AIR_MASS"
-            style="@style/ClusterBar"
-            app:gaugeMin="0"
-            app:gaugeMax="800"
-            app:gaugeUnit="mg"
-            app:gaugeCaption="Air au débitmètre (MAF)" />
-
-        <com.mooo.hairyone.td5tester.views.BarGaugeView
-            android:id="@+id/gMAP_AIR_MASS"
-            style="@style/ClusterBar"
-            app:gaugeMin="0"
-            app:gaugeMax="900"
-            app:gaugeUnit="mg"
-            app:gaugeCaption="Air au collecteur (MAP)" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/hairline_left" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gAF_RATIO"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="30"
             app:gaugeDecimals="1"
@@ -94,7 +138,7 @@
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gIDLE_DEMAND"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="-20"
             app:gaugeMax="20"
             app:gaugeUnit="tr/min"

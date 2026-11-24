@@ -6,10 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_weight="1"
-    android:background="@drawable/tile"
     android:orientation="horizontal"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
     android:paddingTop="6dp"
     android:paddingBottom="4dp">
 

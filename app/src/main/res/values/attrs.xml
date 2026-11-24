@@ -11,5 +11,6 @@
         <attr name="gaugeTickScale" format="float" />
         <attr name="gaugeTile" format="boolean" />
         <attr name="gaugeScaleMarks" format="boolean" />
+        <attr name="gaugeMarker" format="boolean" />
     </declare-styleable>
 </resources>

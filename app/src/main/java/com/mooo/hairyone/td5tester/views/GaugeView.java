@@ -23,6 +23,12 @@ import com.mooo.hairyone.td5tester.R;
  */
 public class GaugeView extends View {
 
+    // Typefaces are created once, not on every frame.
+    protected static final Typeface TF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
+    protected static final Typeface TF_REGULAR = Typeface.create("sans-serif", Typeface.NORMAL);
+    protected static final Typeface TF_MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+    protected static final Typeface TF_BOLD = Typeface.create("sans-serif-medium", Typeface.BOLD);
+
     public static final int STATE_NORMAL = 0;
     public static final int STATE_COLD = 1;
     public static final int STATE_WARN = 2;

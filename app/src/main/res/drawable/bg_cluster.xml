@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The faint glow behind every tab: a little lighter at the centre. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:type="radial"
+        android:centerX="0.5"
+        android:centerY="0.5"
+        android:gradientRadius="75%p"
+        android:startColor="@color/bgCentre"
+        android:endColor="@color/bgEdge" />
+</shape>

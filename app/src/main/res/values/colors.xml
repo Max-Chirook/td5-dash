@@ -32,6 +32,20 @@
     <color name="gaugeNeutral">#F2F2F7</color>
     <color name="track">#2A2A2C</color>
 
+    <!-- Driver-display style (1.6): warm white on near-black, hairlines. -->
+    <color name="ink">#E8E2D5</color>
+    <color name="inkStrong">#F4F1EA</color>
+    <color name="hairline">#2A2C30</color>
+    <color name="tick">#9A9AA0</color>
+    <color name="disc">#0B0C0E</color>
+    <color name="dim">#6E6E73</color>
+    <color name="labelRow">#C7C7CC</color>
+    <color name="dataBlue">#5EA9FF</color>
+    <color name="good">#7FD38A</color>
+    <color name="dialogBg">#111215</color>
+    <color name="bgCentre">#15171A</color>
+    <color name="bgEdge">#050506</color>
+
     <!-- Kept for the tabs still running the original gauges. -->
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="windowBackground">#000000</color>

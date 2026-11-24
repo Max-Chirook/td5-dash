@@ -1,179 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Connection: the connect button in a status ring (white when connected,
+     red without a signal), the fault buttons under it; the vehicle, its
+     faults and the journal on the right. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
-    android:orientation="vertical"
-    android:padding="6dp">
+    android:background="@android:color/transparent"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingEnd="22dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="14dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.4"
-            android:layout_margin="4dp"
-            android:background="@drawable/card"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingTop="12dp"
-            android:paddingBottom="10dp">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <ImageButton
-                android:id="@+id/btConnect"
-                android:layout_width="62dp"
-                android:layout_height="62dp"
-                android:background="@null"
-                android:contentDescription="@string/action_connect"
-                android:padding="12dp"
-                android:scaleType="fitCenter"
-                android:tint="@color/label"
-                app:srcCompat="@drawable/ic_plug" />
+            <com.mooo.hairyone.td5tester.views.StatusRingView
+                android:id="@+id/ring"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-            <TextView
-                android:id="@+id/tvStatus"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:letterSpacing="0.06"
-                android:text="@string/status_disconnected"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btConnect"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    android:background="@null"
+                    android:padding="18dp"
+                    android:scaleType="fitCenter"
+                    android:tint="@color/ink"
+                    android:contentDescription="@string/action_connect"
+                    app:srcCompat="@drawable/ic_plug" />
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.2"
+                    android:text="@string/status_disconnected"
+                    android:textColor="@color/ink"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvStatusSub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:textColor="@color/labelSecondary"
+                    android:textSize="11.5sp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="14dp"
+            android:text="@string/connect_hint"
+            android:textColor="@color/dim"
+            android:textSize="11sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btReadFaults"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/pill_outline"
+                android:gravity="center"
+                android:letterSpacing="0.12"
+                android:text="@string/action_read_faults_caps"
+                android:textColor="@color/inkStrong"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btClearFaults"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/pill_outline_dim"
+                android:gravity="center"
+                android:letterSpacing="0.12"
+                android:text="@string/label_erase"
                 android:textColor="@color/labelSecondary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:background="@drawable/card"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingTop="12dp"
-            android:paddingBottom="10dp">
-
-            <ImageButton
-                android:id="@+id/btReadFaults"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@null"
-                android:contentDescription="@string/action_read_faults"
-                android:padding="11dp"
-                android:scaleType="fitCenter"
-                android:tint="@color/label"
-                app:srcCompat="@drawable/ic_list" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.06"
-                android:text="@string/label_faults"
-                android:textColor="@color/labelSecondary"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="4dp"
-            android:background="@drawable/card"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingTop="12dp"
-            android:paddingBottom="10dp">
-
-            <ImageButton
-                android:id="@+id/btClearFaults"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@null"
-                android:contentDescription="@string/action_clear_faults"
-                android:padding="11dp"
-                android:scaleType="fitCenter"
-                android:tint="@color/label"
-                app:srcCompat="@drawable/ic_erase" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.06"
-                android:text="@string/label_erase"
-                android:textColor="@color/labelSecondary"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-        </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_margin="4dp"
-        android:background="@drawable/card"
-        android:orientation="vertical"
-        android:padding="14dp">
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="26dp"
+        android:background="@color/hairline" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:letterSpacing="0.10"
-            android:text="@string/vehicle"
-            android:textColor="@color/labelTertiary"
-            android:textSize="10sp"
-            android:textStyle="bold" />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.9"
+        android:orientation="vertical">
+
+        <TextView style="@style/ClusterSection" android:text="@string/vehicle" />
+        <View style="@style/SectionRule" android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tvVin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:fontFamily="monospace"
+            android:lineSpacingExtra="3dp"
             android:text="@string/dash_placeholder"
-            android:textColor="@color/labelSecondary"
-            android:textSize="11sp" />
+            android:textColor="@color/ink"
+            android:textSize="13sp" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:letterSpacing="0.10"
-            android:text="@string/faults_title"
-            android:textColor="@color/labelTertiary"
-            android:textSize="10sp"
-            android:textStyle="bold" />
+            style="@style/ClusterSection"
+            android:layout_marginTop="18dp"
+            android:text="@string/faults_title" />
+        <View style="@style/SectionRule" android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tvFaults"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="monospace"
+            android:lineSpacingExtra="5dp"
             android:text="@string/faults_unknown"
-            android:textColor="@color/labelTertiary"
-            android:textSize="11sp" />
+            android:textColor="@color/labelSecondary"
+            android:textSize="13.5sp" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:letterSpacing="0.10"
-            android:text="@string/journal"
-            android:textColor="@color/labelTertiary"
-            android:textSize="10sp"
-            android:textStyle="bold" />
+            style="@style/ClusterSection"
+            android:layout_marginTop="18dp"
+            android:text="@string/journal" />
+        <View style="@style/SectionRule" android:layout_marginBottom="6dp" />
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginTop="4dp"
             android:scrollbars="none">
 
             <TextView
@@ -181,9 +170,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
-                android:lineSpacingExtra="1dp"
-                android:textColor="@color/labelSecondary"
-                android:textSize="10sp" />
+                android:lineSpacingExtra="5dp"
+                android:textColor="#9A9AA0"
+                android:textSize="11.5sp" />
         </ScrollView>
     </LinearLayout>
 </LinearLayout>

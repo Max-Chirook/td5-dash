@@ -1,63 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pedal on the left, temperatures and pressure on the right, as bars in
-     the cluster style. One layout for every width. -->
+<!-- Pedal and temperatures: the pedal and its three sensors with a verdict
+     on whether they agree, then the temperatures and the ambient pressure. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
+    android:background="@android:color/transparent"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginEnd="28dp"
         android:orientation="vertical">
 
-        <TextView
-            style="@style/ClusterSection"
-            android:text="@string/sec_pedal" />
+        <TextView style="@style/ClusterSection" android:text="@string/sec_pedal" />
+        <View style="@style/SectionRule" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gACC_SUPPLY"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="100"
             app:gaugeUnit="%"
             app:gaugeCaption="Enfoncement" />
 
-        <com.mooo.hairyone.td5tester.views.BarGaugeView
-            android:id="@+id/gACC_TRACK_1"
-            style="@style/ClusterBar"
-            app:gaugeMin="0"
-            app:gaugeMax="5"
-            app:gaugeDecimals="2"
-            app:gaugeUnit="V"
-            app:gaugeCaption="Voie 1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/pedal_sensors"
+            android:textColor="@color/labelRow"
+            android:textSize="14sp" />
 
-        <com.mooo.hairyone.td5tester.views.BarGaugeView
-            android:id="@+id/gACC_TRACK_2"
-            style="@style/ClusterBar"
-            app:gaugeMin="0"
-            app:gaugeMax="5"
-            app:gaugeDecimals="2"
-            app:gaugeUnit="V"
-            app:gaugeCaption="Voie 2" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal">
 
-        <com.mooo.hairyone.td5tester.views.BarGaugeView
-            android:id="@+id/gACC_TRACK_3"
-            style="@style/ClusterBar"
-            app:gaugeMin="0"
-            app:gaugeMax="5"
-            app:gaugeDecimals="2"
-            app:gaugeUnit="V"
-            app:gaugeCaption="Voie 3" />
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gACC_TRACK_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="18dp"
+                app:gaugeTile="true"
+                app:gaugeMin="0"
+                app:gaugeMax="5"
+                app:gaugeDecimals="2"
+                app:gaugeUnit="V"
+                app:gaugeCaption="Voie 1" />
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gACC_TRACK_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="18dp"
+                app:gaugeTile="true"
+                app:gaugeMin="0"
+                app:gaugeMax="5"
+                app:gaugeDecimals="2"
+                app:gaugeUnit="V"
+                app:gaugeCaption="Voie 2" />
+
+            <com.mooo.hairyone.td5tester.views.BarGaugeView
+                android:id="@+id/gACC_TRACK_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:gaugeTile="true"
+                app:gaugeMin="0"
+                app:gaugeMax="5"
+                app:gaugeDecimals="2"
+                app:gaugeUnit="V"
+                app:gaugeCaption="Voie 3" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTracks"
+            style="@style/Verdict"
+            android:layout_width="match_parent"
+            android:layout_marginTop="6dp"
+            tools:text="Les 3 voies concordent" />
+
+        <TextView
+            style="@style/Hint"
+            android:layout_marginTop="10dp"
+            android:text="@string/pedal_hint" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.4" />
     </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="26dp"
+        android:background="@color/hairline" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -65,13 +114,12 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            style="@style/ClusterSection"
-            android:text="@string/sec_temps" />
+        <TextView style="@style/ClusterSection" android:text="@string/sec_temps" />
+        <View style="@style/SectionRule" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gFUEL_TEMP"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="100"
             app:gaugeUnit="°C"
@@ -79,7 +127,7 @@
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gINLET_TEMP"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="0"
             app:gaugeMax="100"
             app:gaugeUnit="°C"
@@ -87,15 +135,21 @@
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gEXTERNAL_TEMP"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="-20"
             app:gaugeMax="60"
             app:gaugeUnit="°C"
             app:gaugeCaption="Extérieure (boîte à air)" />
 
+        <TextView
+            style="@style/ClusterSection"
+            android:layout_marginTop="8dp"
+            android:text="@string/sec_ambient" />
+        <View style="@style/SectionRule" />
+
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gAMBIENT_PRESSURE"
-            style="@style/ClusterBar"
+            style="@style/DetailRow"
             app:gaugeMin="50"
             app:gaugeMax="110"
             app:gaugeDecimals="1"

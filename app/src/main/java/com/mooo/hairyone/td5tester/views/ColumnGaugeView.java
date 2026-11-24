@@ -3,9 +3,8 @@ package com.mooo.hairyone.td5tester.views;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 
 import androidx.core.content.ContextCompat;
@@ -13,17 +12,19 @@ import androidx.core.content.ContextCompat;
 import com.mooo.hairyone.td5tester.R;
 
 /**
- * A reading centred on zero as a vertical column, for the injector balance:
- * the value on top, the name below, and the column growing up or down from a
- * zero line. Several placed side by side share one green band (the ideal
- * range) and one zero line, since each draws them across its full width.
+ * A reading centred on zero as a fine graduated rail, for the injector
+ * balance: the value on top, the name below, a white stem from zero and a dot
+ * at the reading. Several side by side share the green band (the ideal range)
+ * and the zero line, since each draws them across its full width.
  */
 public class ColumnGaugeView extends GaugeView {
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint line = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint dashed = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final RectF rect = new RectF();
     private boolean scaleMarks = false;
+    private final int ink, inkStrong, hairline, good, grey, dim;
 
     public ColumnGaugeView(Context context) { this(context, null); }
 
@@ -34,13 +35,21 @@ public class ColumnGaugeView extends GaugeView {
             scaleMarks = a.getBoolean(R.styleable.GaugeView_gaugeScaleMarks, false);
             a.recycle();
         }
+        ink = color(R.color.ink);
+        inkStrong = color(R.color.inkStrong);
+        hairline = color(R.color.hairline);
+        good = color(R.color.stateNormal);
+        grey = color(R.color.labelSecondary);
+        dim = color(R.color.dim);
         text.setTextAlign(Paint.Align.CENTER);
         text.setFontFeatureSettings("tnum");
+        line.setStyle(Paint.Style.STROKE);
+        line.setStrokeCap(Paint.Cap.ROUND);
+        dashed.setStyle(Paint.Style.STROKE);
     }
 
     private int color(int res) { return ContextCompat.getColor(getContext(), res); }
 
-    /** Vertical position of a value: the maximum at the top, the minimum at the bottom. */
     private float yOf(float v, float top, float bottom) {
         return bottom - (bottom - top) * fractionOf(v);
     }
@@ -48,61 +57,75 @@ public class ColumnGaugeView extends GaugeView {
     @Override protected void onDraw(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
-        float s = Math.min(h / 420f, w / 115f);
+        float s = Math.min(h / 400f, w / 110f);
         float cx = w / 2f;
-        float valueBase = 40f * s;
-        float top = 60f * s;
-        float bottom = h - 46f * s;
+        float top = 64f * s;
+        float bottom = h - 40f * s;
         float zero = origin != null ? origin : 0f;
         float zy = yOf(zero, top, bottom);
 
         // The ideal range, across the full width so neighbours join up.
         if (!Float.isInfinite(warnAbove) && !Float.isInfinite(warnBelow)) {
-            paint.setColor(color(R.color.goodBand));
-            canvas.drawRect(0, yOf(warnAbove, top, bottom), w, yOf(warnBelow, top, bottom), paint);
+            float a = yOf(warnAbove, top, bottom), b = yOf(warnBelow, top, bottom);
+            paint.setColor((good & 0x00FFFFFF) | (18 << 24));
+            canvas.drawRect(0, a, w, b, paint);
+            dashed.setColor((good & 0x00FFFFFF) | (90 << 24));
+            dashed.setStrokeWidth(Math.max(1f, s));
+            dashed.setPathEffect(new DashPathEffect(new float[]{3 * s, 4 * s}, 0));
+            canvas.drawLine(0, a, w, a, dashed);
+            canvas.drawLine(0, b, w, b, dashed);
             if (scaleMarks) {
                 text.setTextAlign(Paint.Align.LEFT);
-                text.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
-                text.setTextSize(12f * s);
-                text.setColor(color(R.color.goodBandText));
-                canvas.drawText("+" + Math.round(warnAbove), 4f * s, yOf(warnAbove, top, bottom) - 6f * s, text);
-                canvas.drawText("−" + Math.round(Math.abs(warnBelow)), 4f * s, yOf(warnBelow, top, bottom) + 16f * s, text);
+                text.setTypeface(TF_REGULAR);
+                text.setTextSize(11f * s);
+                text.setColor(good);
+                canvas.drawText("+" + Math.round(warnAbove), 2f * s, a - 5f * s, text);
+                canvas.drawText("−" + Math.round(Math.abs(warnBelow)), 2f * s, b + 14f * s, text);
                 text.setTextAlign(Paint.Align.CENTER);
             }
         }
 
-        // The column's track, then the zero line across.
-        float half = 20f * s;
-        paint.setColor(trackColor);
-        rect.set(cx - half, top, cx + half, bottom);
-        canvas.drawRoundRect(rect, 8f * s, 8f * s, paint);
-        paint.setColor(color(R.color.labelTertiary));
-        canvas.drawRect(0, zy - 1f * s, w, zy + 1f * s, paint);
+        // The rail and its graduations, then the zero line across.
+        line.setStrokeWidth(2f * s);
+        line.setColor(hairline);
+        canvas.drawLine(cx, top, cx, bottom, line);
+        line.setStrokeWidth(Math.max(1f, s));
+        line.setColor(0xFF3A3C40);
+        float step = (maxValue - minValue) / 6f;
+        for (int k = 0; k <= 6; k++) {
+            float v = minValue + k * step;
+            if (Math.abs(v - zero) < step / 10f) continue;
+            float y = yOf(v, top, bottom);
+            canvas.drawLine(cx - 5 * s, y, cx + 5 * s, y, line);
+        }
+        paint.setColor(0xFF55575C);
+        canvas.drawRect(0, zy - 0.5f * s, w, zy + 0.5f * s, paint);
 
         int state = stale ? STATE_NORMAL : getState();
-        int fill = stale ? trackColor : stateColor();
+        int mark = stale ? dim : state == STATE_NORMAL ? inkStrong : stateColor();
         if (hasValue) {
             float vy = yOf(shownValue, top, bottom);
-            float a = Math.min(vy, zy), b = Math.max(vy, zy);
-            float min = 6f * s;
-            if (b - a < min) { float m = (a + b) / 2; a = m - min / 2; b = m + min / 2; }
-            paint.setColor(fill);
-            rect.set(cx - half, a, cx + half, b);
-            canvas.drawRoundRect(rect, 6f * s, 6f * s, paint);
+            line.setStrokeWidth(6f * s);
+            line.setColor(mark);
+            if (Math.abs(vy - zy) > 2 * s) canvas.drawLine(cx, zy, cx, vy, line);
+            paint.setColor(mark);
+            canvas.drawCircle(cx, vy, 7f * s, paint);
         }
 
         String value = hasValue ? String.format("%." + decimals + "f", shownValue) : "—";
         if (hasValue && shownValue > zero && !value.matches("[0.,]+")) value = "+" + value;
         if (hasValue && shownValue < zero) value = value.replace('-', '−');
-        text.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        text.setTypeface(TF_LIGHT);
         text.setTextSize(30f * s);
-        text.setColor(stale ? color(R.color.labelTertiary)
-                : state == STATE_NORMAL ? color(R.color.label) : fill);
-        canvas.drawText(value, cx, valueBase, text);
+        text.setLetterSpacing(0f);
+        text.setColor(stale ? dim : state == STATE_NORMAL ? ink : stateColor());
+        canvas.drawText(value, cx, 38f * s, text);
 
-        text.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        text.setTextSize(16f * s);
-        text.setColor(color(stale ? R.color.labelTertiary : R.color.labelTile));
-        canvas.drawText(stale ? "perdu" : (caption == null ? "" : caption), cx, h - 16f * s, text);
+        text.setTypeface(TF_MEDIUM);
+        text.setTextSize(11f * s);
+        text.setLetterSpacing(0.2f);
+        text.setColor(stale ? dim : grey);
+        String name = stale ? "PERDU" : caption == null ? "" : caption.toUpperCase();
+        canvas.drawText(name, cx, h - 12f * s, text);
     }
 }

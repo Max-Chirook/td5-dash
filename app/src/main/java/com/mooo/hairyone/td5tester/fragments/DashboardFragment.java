@@ -7,11 +7,14 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
 import com.mooo.hairyone.td5tester.Conversions;
 import com.mooo.hairyone.td5tester.FuelTank;
+import com.mooo.hairyone.td5tester.GearEstimator;
+import com.mooo.hairyone.td5tester.Limiters;
 import com.mooo.hairyone.td5tester.MafHealth;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
@@ -86,7 +89,14 @@ public class DashboardFragment extends BaseFragment {
             case VEHICLE_SPEED:
                 gRPM.setSecondary(String.format("%.0f km/h", value));
                 kmh = value;
+                if (gFUEL instanceof ReadoutView) {
+                    ((ReadoutView) gFUEL).setGear(GearEstimator.label(computer().gear()));
+                }
                 break;
+            case SMOKE_LIMIT:
+                // The last word of the fuelling frame: the limiter state is known.
+                updateLimiter(computer().limiter());
+                return;
             case AIR_FLOW: {
                 double flow = Conversions.airFlowOrNoReading(value);
                 if (Conversions.isNoReading(flow)) gAIRFLOW.clearValue();
@@ -148,9 +158,12 @@ public class DashboardFragment extends BaseFragment {
 
         // A dash until the first kilometre, so the line is there from the start.
         double avg = t.fuelAverage();
-        gFUEL.setFootnote(Double.isNaN(avg) ? "moy. —" : String.format("moy. %.1f L/100", avg));
+        gFUEL.setFootnote(Double.isNaN(avg) ? "moy. —" : String.format("moy. %.1f", avg));
         gFUEL.setFootColor(color);
-        if (gFUEL instanceof ReadoutView) ((ReadoutView) gFUEL).setExtra(distance(t, total));
+        if (gFUEL instanceof ReadoutView) {
+            ((ReadoutView) gFUEL).setExtra(distance(t, total));
+            ((ReadoutView) gFUEL).setAverage((float) avg);
+        }
 
         showRange();
         if (gAIRFLOW instanceof BarGaugeView) {
@@ -162,9 +175,9 @@ public class DashboardFragment extends BaseFragment {
         }
 
         if (tvTrip != null) {
-            tvTrip.setBackgroundResource(total ? 0 : R.drawable.toggle_trip_on);
-            tvTrip.setTextColor(getResources().getColor(total ? R.color.labelSecondary : R.color.label));
-            tvTotal.setBackgroundResource(total ? R.drawable.toggle_total_on : 0);
+            tvTrip.setBackgroundResource(total ? 0 : R.drawable.underline_on);
+            tvTrip.setTextColor(getResources().getColor(total ? R.color.labelSecondary : R.color.ink));
+            tvTotal.setBackgroundResource(total ? R.drawable.underline_on : 0);
             tvTotal.setTextColor(getResources().getColor(total ? R.color.stateTotal : R.color.labelSecondary));
         }
     }
@@ -176,21 +189,21 @@ public class DashboardFragment extends BaseFragment {
     private void showRange() {
         if (tvRange == null) return;
         Context c = requireContext();
-        SpannableStringBuilder sb = new SpannableStringBuilder(getString(R.string.range_label) + "   ");
+        SpannableStringBuilder sb = new SpannableStringBuilder(getString(R.string.range_label).toUpperCase(Locale.FRANCE));
+        sb.setSpan(new RelativeSizeSpan(0.82f), 0, sb.length(), 0);
+        sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, sb.length(), 0);
+        sb.append("   ");
         FuelTank tank = computer().tank();
         if (Vehicle.model(c) < 0 || !tank.isKnown()) {
             sb.append(getString(R.string.range_set));
         } else {
             double km = computer().rangeKm();
             int start = sb.length();
-            sb.append(String.format(Locale.FRANCE, "%.0f", km));
-            sb.setSpan(new ForegroundColorSpan(DashboardSheets.rangeColor(c, km)), start, sb.length(), 0);
+            sb.append(String.format(Locale.FRANCE, "%.0f km", km));
+            int kmColor = DashboardSheets.rangeColor(c, km);
+            sb.setSpan(new ForegroundColorSpan(kmColor), start, sb.length(), 0);
             sb.setSpan(new RelativeSizeSpan(1.3f), start, sb.length(), 0);
-            sb.append(" km");
-            start = sb.length();
-            sb.append("  ·  ");
-            sb.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.labelTertiary)), start, sb.length(), 0);
-            sb.append(String.format(Locale.FRANCE, "%.0f L", tank.remaining()));
+            sb.append(String.format(Locale.FRANCE, "    %.0f L", tank.remaining()));
         }
         if (!TextUtils.equals(tvRange.getText(), sb)) tvRange.setText(sb);
     }
@@ -228,25 +241,68 @@ public class DashboardFragment extends BaseFragment {
                 .show();
     }
 
+    // The centre of the top line shows "BRIDÉ" while a limiter holds the fuel
+    // back, held a moment so it does not flicker, and the warm-up note otherwise.
+    private static final long LIMITER_HOLD_MS = 1500;
+    private Limiters.State shownLimiter = Limiters.State.FREE;
+    private long limiterSeenMs = 0;
+    private CharSequence warmText = null;
+    private int warmColor = 0;
+    private boolean warmVisible = false;
+
+    private void updateLimiter(Limiters.State state) {
+        long now = android.os.SystemClock.elapsedRealtime();
+        if (state != Limiters.State.FREE) {
+            shownLimiter = state;
+            limiterSeenMs = now;
+        } else if (now - limiterSeenMs > LIMITER_HOLD_MS) {
+            shownLimiter = Limiters.State.FREE;
+        }
+        showBanner();
+    }
+
+    private void showBanner() {
+        if (tvWarmup == null) return;
+        if (shownLimiter != Limiters.State.FREE) {
+            tvWarmup.setText(shownLimiter == Limiters.State.SMOKE ? R.string.limited_smoke : R.string.limited_torque);
+            tvWarmup.setTextColor(getResources().getColor(R.color.stateHigh));
+            tvWarmup.setBackgroundResource(R.drawable.pill_warn);
+            tvWarmup.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (!warmVisible) {
+            tvWarmup.setVisibility(View.GONE);
+            return;
+        }
+        tvWarmup.setText(warmText);
+        tvWarmup.setTextColor(warmColor);
+        tvWarmup.setBackgroundResource(warmColor == getResources().getColor(R.color.stateNormal) ? R.drawable.pill_good : R.drawable.pill_info);
+        tvWarmup.setVisibility(View.VISIBLE);
+    }
+
+    private void showWarm(CharSequence text, int colorRes) {
+        warmText = text;
+        warmColor = getResources().getColor(colorRes);
+        warmVisible = true;
+        showBanner();
+    }
+
     private void updateWarmup(float celsius) {
         if (tvWarmup == null) return;
         float warmAt = s("warm_c");
         if (celsius < warmAt) {
             boolean freezing = celsius < s("cold_c");
-            tvWarmup.setText(getString(freezing ? R.string.warm_cold : R.string.warm_rising,
-                    Math.round(celsius)));
-            tvWarmup.setTextColor(getResources().getColor(R.color.stateInfo));
-            tvWarmup.setVisibility(View.VISIBLE);
+            showWarm(getString(freezing ? R.string.warm_cold : R.string.warm_rising,
+                    Math.round(celsius)), R.color.stateInfo);
             warmAnnounced = false;
             return;
         }
         if (warmAnnounced) return;
         warmAnnounced = true;
-        tvWarmup.setText(R.string.warm_ready);
-        tvWarmup.setTextColor(getResources().getColor(R.color.stateNormal));
-        tvWarmup.setVisibility(View.VISIBLE);
+        showWarm(getString(R.string.warm_ready), R.color.stateNormal);
         handler.postDelayed(() -> {
-            if (tvWarmup != null) tvWarmup.setVisibility(View.GONE);
+            warmVisible = false;
+            showBanner();
         }, WARM_CONFIRMATION_MS);
     }
 
@@ -263,7 +319,7 @@ public class DashboardFragment extends BaseFragment {
         gCOOLANT.setBands(none, none, s("coolant_warn"), s("coolant_alert"));
         gCOOLANT.setColdBelow(s("coolant_cold"));
         gAIRFLOW.setBands(none, none, s("maf_warn"), s("maf_alert"));
-        gFUEL.setBands(none, none, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+        gFUEL.setBands(none, none, 20f, Float.POSITIVE_INFINITY);
     }
 
     private float s(String key) {

@@ -1,85 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A digital cluster: the two quick readings as large dials, fuel economy
-     between them, and the slow readings as bars along the foot. -->
+<!-- Driver display: engine speed and turbo as round instruments, fuel economy
+     and the gear between them, the slow readings as fine bars along the foot. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
+    android:background="@android:color/transparent"
     android:orientation="vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="6dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="4dp"
     android:paddingBottom="8dp">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="34dp">
-
-        <TextView
-            android:id="@+id/tvWarmup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/card"
-            android:letterSpacing="0.04"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            tools:visibility="visible"
-            tools:text="MONTÉE EN TEMPÉRATURE — 72 °C" />
+        android:layout_height="36dp">
 
         <!-- Range left in the tank; a touch opens the fill-up screen. -->
         <TextView
             android:id="@+id/tvRange"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
-            android:background="@drawable/toggle_track"
             android:gravity="center_vertical"
-            android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/labelSecondary"
             android:textSize="13sp"
-            tools:text="Autonomie   412 km  ·  38 L" />
+            tools:text="AUTONOMIE   281 km   72 L" />
+
+        <!-- The warm-up note, or "BRIDÉ" while a limiter holds the fuel back. -->
+        <TextView
+            android:id="@+id/tvWarmup"
+            android:layout_width="wrap_content"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:letterSpacing="0.06"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:background="@drawable/pill_warn"
+            tools:textColor="@color/stateHigh"
+            tools:visibility="visible"
+            tools:text="⚠  BRIDÉ · FUMÉE" />
 
         <!-- Trip or long-term total in the grey lines; a long press on
              "Total" offers to reset it. -->
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="match_parent"
             android:layout_gravity="end|center_vertical"
-            android:background="@drawable/toggle_track"
-            android:orientation="horizontal"
-            android:padding="3dp">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvTrip"
-                android:layout_width="76dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="18dp"
                 android:gravity="center"
-                android:text="@string/trip"
-                android:textSize="13sp" />
+                android:letterSpacing="0.16"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:text="@string/trip_caps"
+                android:textSize="11sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvTotal"
-                android:layout_width="76dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="center_vertical"
                 android:gravity="center"
-                android:text="@string/total"
-                android:textSize="13sp" />
+                android:letterSpacing="0.16"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:text="@string/total_caps"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/hairline_fade" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:orientation="horizontal">
 
         <com.mooo.hairyone.td5tester.views.ClusterDialView
@@ -98,12 +113,12 @@
             android:id="@+id/gFUEL"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.5"
+            android:layout_weight="0.62"
             app:gaugeMin="0"
             app:gaugeMax="30"
             app:gaugeDecimals="1"
             app:gaugeUnit="L/100 km"
-            app:gaugeCaption="Conso" />
+            app:gaugeCaption="Consommation" />
 
         <com.mooo.hairyone.td5tester.views.ClusterDialView
             android:id="@+id/gTURBO"
@@ -121,12 +136,14 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="6dp"
-        android:background="@color/surface" />
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/hairline_fade" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="84dp"
+        android:layout_height="60dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:orientation="horizontal">
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
@@ -134,7 +151,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="30dp"
             app:gaugeMin="10"
             app:gaugeMax="16"
             app:gaugeDecimals="1"
@@ -146,11 +163,11 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="30dp"
             app:gaugeMin="0"
             app:gaugeMax="130"
             app:gaugeUnit="°C"
-            app:gaugeCaption="T° moteur" />
+            app:gaugeCaption="Température moteur" />
 
         <com.mooo.hairyone.td5tester.views.BarGaugeView
             android:id="@+id/gAIRFLOW"

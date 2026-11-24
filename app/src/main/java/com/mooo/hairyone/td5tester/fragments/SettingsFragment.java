@@ -56,26 +56,48 @@ public class SettingsFragment extends BaseFragment {
         build();
     }
 
+    /**
+     * One framed block per category, a title above it and a gap below, the
+     * rows inside separated by a hairline.
+     */
     private void build() {
         list.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
         String section = null;
+        LinearLayout block = null;
 
         for (Settings.Entry entry : Settings.ENTRIES) {
             if (!entry.section.equals(section)) {
                 section = entry.section;
                 TextView header = new TextView(requireContext());
                 header.setText(section.toUpperCase(Locale.FRENCH));
-                header.setTextSize(11f);
-                header.setLetterSpacing(0.10f);
+                header.setTextSize(10.5f);
+                header.setLetterSpacing(0.24f);
                 header.setTypeface(header.getTypeface(), android.graphics.Typeface.BOLD);
-                header.setTextColor(getResources().getColor(R.color.labelTertiary));
-                header.setPadding(0, (int) (18 * density), 0, (int) (6 * density));
+                header.setTextColor(getResources().getColor(R.color.labelSecondary));
+                header.setPadding((int) (4 * density), (int) (block == null ? 6 * density : 20 * density), 0, (int) (8 * density));
                 list.addView(header);
-                if (section.equals(Settings.VEHICLE)) list.addView(modelRow(density));
+                block = new LinearLayout(requireContext());
+                block.setOrientation(LinearLayout.VERTICAL);
+                block.setBackgroundResource(R.drawable.block);
+                list.addView(block, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                if (section.equals(Settings.VEHICLE)) block.addView(modelRow(density));
             }
-            list.addView(row(entry, density));
+            if (block.getChildCount() > 0) block.addView(separator(density));
+            block.addView(row(entry, density));
         }
+    }
+
+    private View separator(float density) {
+        View line = new View(requireContext());
+        line.setBackgroundColor(getResources().getColor(R.color.hairline));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, (int) density));
+        lp.setMarginStart((int) (20 * density));
+        lp.setMarginEnd((int) (20 * density));
+        line.setLayoutParams(lp);
+        return line;
     }
 
     /** The model, chosen from a list; it fills in the tank capacity below it. */
@@ -83,18 +105,18 @@ public class SettingsFragment extends BaseFragment {
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setBackgroundResource(R.drawable.card);
-        row.setPadding((int) (16 * density), (int) (14 * density),
-                (int) (16 * density), (int) (14 * density));
+        row.setBackgroundResource(0);
+        row.setPadding((int) (20 * density), (int) (14 * density),
+                (int) (20 * density), (int) (14 * density));
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        rp.bottomMargin = (int) (5 * density);
+        rp.bottomMargin = 0;
         row.setLayoutParams(rp);
 
         TextView label = new TextView(requireContext());
         label.setText(R.string.vehicle_model);
-        label.setTextSize(13f);
-        label.setTextColor(getResources().getColor(R.color.label));
+        label.setTextSize(15f);
+        label.setTextColor(getResources().getColor(R.color.ink));
         label.setLayoutParams(new LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         row.addView(label);
@@ -102,8 +124,9 @@ public class SettingsFragment extends BaseFragment {
         String name = Vehicle.name(requireContext());
         TextView value = new TextView(requireContext());
         value.setText(name == null ? getString(R.string.vehicle_none) + "  ›" : name + "  ›");
-        value.setTextSize(14f);
-        value.setTextColor(getResources().getColor(name == null ? R.color.stateHigh : R.color.label));
+        value.setTextSize(17f);
+        value.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        value.setTextColor(getResources().getColor(name == null ? R.color.stateHigh : R.color.ink));
         row.addView(value);
 
         row.setOnClickListener(v -> Vehicle.choose(requireContext(), this::build));
@@ -114,18 +137,18 @@ public class SettingsFragment extends BaseFragment {
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setBackgroundResource(R.drawable.card);
-        row.setPadding((int) (16 * density), (int) (10 * density),
-                (int) (16 * density), (int) (10 * density));
+        row.setBackgroundResource(0);
+        row.setPadding((int) (20 * density), (int) (6 * density),
+                (int) (20 * density), (int) (6 * density));
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        rp.bottomMargin = (int) (5 * density);
+        rp.bottomMargin = 0;
         row.setLayoutParams(rp);
 
         TextView label = new TextView(requireContext());
         label.setText(entry.label);
-        label.setTextSize(13f);
-        label.setTextColor(getResources().getColor(R.color.label));
+        label.setTextSize(15f);
+        label.setTextColor(getResources().getColor(R.color.ink));
         label.setLayoutParams(new LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         row.addView(label);
@@ -134,9 +157,10 @@ public class SettingsFragment extends BaseFragment {
         field.setInputType(InputType.TYPE_CLASS_NUMBER
                 | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         field.setText(format(Settings.get(requireContext(), entry.key)));
-        field.setTextSize(14f);
+        field.setTextSize(18f);
         field.setGravity(Gravity.END);
-        field.setTextColor(getResources().getColor(R.color.label));
+        field.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        field.setTextColor(getResources().getColor(R.color.ink));
         field.setBackground(null);
         field.setLayoutParams(new LinearLayout.LayoutParams((int) (86 * density),
                 ViewGroup.LayoutParams.WRAP_CONTENT));

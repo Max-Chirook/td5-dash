@@ -20,6 +20,8 @@ public class TemperatureAndPressureFragment extends BaseFragment {
 
     GaugeView gACC_TRACK_1, gACC_TRACK_2, gACC_TRACK_3, gACC_SUPPLY;
     GaugeView gAMBIENT_PRESSURE, gFUEL_TEMP, gINLET_TEMP, gEXTERNAL_TEMP;
+    android.widget.TextView tvTracks;
+    private final float[] tracks = {Float.NaN, Float.NaN, Float.NaN};
 
     public TemperatureAndPressureFragment() { /* Required empty public constructor */ }
 
@@ -27,9 +29,9 @@ public class TemperatureAndPressureFragment extends BaseFragment {
     public void onDashboardEvent(DashboardEvent event) {
         float value = (float) event.value;
         switch (event.data_type) {
-            case ACC_TRACK_1:       gACC_TRACK_1.setValue(value); break;
-            case ACC_TRACK_2:       gACC_TRACK_2.setValue(value); break;
-            case ACC_TRACK_3:       gACC_TRACK_3.setValue(value); break;
+            case ACC_TRACK_1:       gACC_TRACK_1.setValue(value); tracks[0] = value; break;
+            case ACC_TRACK_2:       gACC_TRACK_2.setValue(value); tracks[1] = value; break;
+            case ACC_TRACK_3:       gACC_TRACK_3.setValue(value); tracks[2] = value; showTracks(); break;
             // The supply channel holds still on the vehicle; the driver demand
             // from the fuelling frame is what follows the pedal.
             case DRIVER_DEMAND: {
@@ -37,9 +39,12 @@ public class TemperatureAndPressureFragment extends BaseFragment {
                 if (!Conversions.isNoReading(percent)) gACC_SUPPLY.setValue((float) percent);
                 break;
             }
-            case AMBIENT_PRESSURE:  gAMBIENT_PRESSURE.setValue(value); break;
-            case FUEL_TEMP:         gFUEL_TEMP.setValue(value); break;
-            case INLET_TEMP:        gINLET_TEMP.setValue(value); break;
+            case AMBIENT_PRESSURE:
+                gAMBIENT_PRESSURE.setValue(value);
+                gAMBIENT_PRESSURE.setFootnote(getString(R.string.altitude, Math.round(altitudeMetres(value) / 10f) * 10));
+                break;
+            case FUEL_TEMP:         gFUEL_TEMP.setValue(value); tempFoot(gFUEL_TEMP, value, s("fuel_warn"), s("fuel_alert")); break;
+            case INLET_TEMP:        gINLET_TEMP.setValue(value); tempFoot(gINLET_TEMP, value, s("inlet_warn"), s("inlet_alert")); break;
             case EXTERNAL_TEMP: {
                 double outside = Conversions.externalTemperatureOrNoReading(value);
                 if (Conversions.isNoReading(outside)) gEXTERNAL_TEMP.clearValue();
@@ -47,6 +52,37 @@ public class TemperatureAndPressureFragment extends BaseFragment {
                 break;
             }
         }
+    }
+
+    /**
+     * The three pedal tracks should read the same, give or take a little
+     * noise; a spread beyond 0.15 V means one of them is going.
+     */
+    private void showTracks() {
+        if (tvTracks == null) return;
+        float lo = Float.POSITIVE_INFINITY, hi = Float.NEGATIVE_INFINITY;
+        for (float t : tracks) {
+            if (Float.isNaN(t)) return;
+            lo = Math.min(lo, t);
+            hi = Math.max(hi, t);
+        }
+        if (hi - lo <= 0.15f) {
+            Verdict.show(tvTracks, getString(R.string.tracks_ok), getResources().getColor(R.color.stateNormal));
+        } else {
+            Verdict.show(tvTracks, getString(R.string.tracks_bad, hi - lo), getResources().getColor(R.color.stateHigh));
+        }
+    }
+
+    private void tempFoot(GaugeView gauge, float value, float warn, float alert) {
+        int text = value >= alert ? R.string.temp_very_hot : value >= warn ? R.string.temp_hot : R.string.temp_normal;
+        int color = value >= alert ? R.color.stateAlert : value >= warn ? R.color.stateHigh : R.color.stateNormal;
+        gauge.setFootnote(getString(text));
+        gauge.setFootColor(getResources().getColor(color));
+    }
+
+    /** Standard atmosphere: the height that gives this pressure. */
+    static float altitudeMetres(float kpa) {
+        return (float) (44330.0 * (1 - Math.pow(kpa / 101.325, 1 / 5.255)));
     }
 
     private void applyBands() {
@@ -80,6 +116,8 @@ public class TemperatureAndPressureFragment extends BaseFragment {
         gFUEL_TEMP = view.findViewById(R.id.gFUEL_TEMP);
         gINLET_TEMP = view.findViewById(R.id.gINLET_TEMP);
         gEXTERNAL_TEMP = view.findViewById(R.id.gEXTERNAL_TEMP);
+        tvTracks = view.findViewById(R.id.tvTracks);
+        Verdict.show(tvTracks, getString(R.string.lim_wait), getResources().getColor(R.color.labelSecondary));
 
         applyBands();
 

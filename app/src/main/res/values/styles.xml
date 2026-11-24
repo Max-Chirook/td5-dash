@@ -35,16 +35,73 @@
     <style name="ClusterSection">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingStart">6dp</item>
         <item name="android:paddingTop">2dp</item>
-        <item name="android:letterSpacing">0.10</item>
-        <item name="android:textColor">@color/labelTertiary</item>
-        <item name="android:textSize">11sp</item>
+        <item name="android:paddingBottom">7dp</item>
+        <item name="android:letterSpacing">0.24</item>
+        <item name="android:textColor">@color/labelSecondary</item>
+        <item name="android:textSize">10.5sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <!-- The fading line under a section title. -->
+    <style name="SectionRule">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:background">@drawable/hairline_left</item>
+    </style>
+
+    <!-- A plain-text label in the detail tabs. -->
+    <style name="RowLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/labelRow</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- A large light figure in the detail tabs. -->
+    <style name="BigFigure">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textSize">38sp</item>
+    </style>
+
+    <!-- The small grey explanation under a reading. -->
+    <style name="Hint">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:textColor">@color/dim</item>
+        <item name="android:textSize">11.5sp</item>
+    </style>
+
+    <!-- A verdict in a tinted pill, with its colour set in code. -->
+    <style name="Verdict">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">34dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- A row of the detail tabs, drawn by BarGaugeView. -->
+    <style name="DetailRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:maxHeight">80dp</item>
+        <item name="gaugeTile">true</item>
+    </style>
+
     <!-- One tile in such a column: they share the height between them. -->
-    <style name="ClusterBar">
+    <style name="ClusterBarOld">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:layout_weight">1</item>

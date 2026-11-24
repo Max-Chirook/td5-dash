@@ -38,6 +38,8 @@ public class ConnectFragment extends BaseFragment {
     TextView tvInfo;
     ImageButton btConnect;
     TextView tvStatus;
+    private TextView tvStatusSub;
+    private com.mooo.hairyone.td5tester.views.StatusRingView ring;
     TextView tvVin;
     TextView tvFaults;
 
@@ -70,7 +72,7 @@ public class ConnectFragment extends BaseFragment {
             if (sb.length() > 0) sb.append("\n");
             sb.append(fault.code()).append("  ").append(fault.label);
         }
-        tvFaults.setText(sb.toString());
+        tvFaults.setText(sb.toString().trim().replaceAll("(?m)^", "\u25CF  "));
         tvFaults.setTextColor(getResources().getColor(R.color.stateAlert));
     }
 
@@ -105,20 +107,38 @@ public class ConnectFragment extends BaseFragment {
     private void showState() {
         if (tvStatus == null || getContext() == null) return;
         EcuSession s = session();
+        int ink = getResources().getColor(R.color.ink);
+        int red = getResources().getColor(R.color.stateAlert);
+        int grey = getResources().getColor(R.color.labelSecondary);
         switch (s.state()) {
             case CONNECTING:
-                tvStatus.setText(R.string.status_connecting);
+                status(R.string.status_connecting, R.string.status_sub_connecting, ink, grey, getResources().getColor(R.color.dim));
                 break;
             case CONNECTED:
-                tvStatus.setText(Consts.DEBUG_UI ? R.string.status_connected_demo : R.string.status_connected);
+                status(R.string.status_connected, Consts.DEBUG_UI ? R.string.status_sub_demo : R.string.status_sub_live,
+                        ink, grey, getResources().getColor(R.color.inkStrong));
                 break;
             default:
-                tvStatus.setText(Consts.DEBUG_UI ? R.string.status_demo : R.string.status_disconnected);
+                if (Consts.DEBUG_UI) {
+                    status(R.string.status_demo_ready, R.string.status_sub_demo_ready, ink, grey, getResources().getColor(R.color.dim));
+                } else {
+                    status(R.string.status_no_signal, R.string.status_sub_no_signal, red, red, red);
+                }
                 break;
         }
         boolean enabled = !s.isBusy() && s.state() != EcuSession.State.CONNECTING;
         btConnect.setEnabled(enabled);
         btConnect.setAlpha(enabled ? 1f : 0.4f);
+    }
+
+    private void status(int text, int sub, int textColor, int subColor, int ringColor) {
+        tvStatus.setText(text);
+        tvStatus.setTextColor(textColor);
+        if (tvStatusSub != null) {
+            tvStatusSub.setText(sub);
+            tvStatusSub.setTextColor(subColor);
+        }
+        if (ring != null) ring.setColor(ringColor);
     }
 
     private void showJournal() {
@@ -145,6 +165,8 @@ public class ConnectFragment extends BaseFragment {
     @Override public void onDestroyView() {
         tvInfo = null;
         tvStatus = null;
+        tvStatusSub = null;
+        ring = null;
         tvVin = null;
         tvFaults = null;
         super.onDestroyView();
@@ -162,6 +184,8 @@ public class ConnectFragment extends BaseFragment {
     @Override protected void bindViews(View view) {
         tvInfo = view.findViewById(R.id.tvInfo);
         tvStatus = view.findViewById(R.id.tvStatus);
+        tvStatusSub = view.findViewById(R.id.tvStatusSub);
+        ring = view.findViewById(R.id.ring);
         tvVin = view.findViewById(R.id.tvVin);
         tvFaults = view.findViewById(R.id.tvFaults);
         btConnect = view.findViewById(R.id.btConnect);
