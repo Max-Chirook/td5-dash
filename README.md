@@ -12,22 +12,20 @@ s'ouvre directement sur les jauges.
 
 ## Le principe : le silence veut dire que tout va bien
 
-Les jauges restent **blanches** tant qu'une valeur est dans sa plage normale. La couleur
-n'apparaît **que** lorsqu'une valeur en sort. Un écran blanc veut dire que tout est
-correct ; s'il y a une seule tuile colorée, c'est là qu'il faut regarder.
+Le style reprend celui des écrans conducteur récents : blanc chaud sur fond presque noir,
+traits fins, zones orange et rouge discrètes sur les cadrans. Les valeurs restent
+**blanches** tant qu'elles sont dans leur plage normale ; la couleur n'apparaît **que**
+lorsqu'une valeur en sort. Un écran blanc veut dire que tout est correct.
 
 | État | Couleur | Exemple |
 |---|---|---|
 | Normal | blanc | liquide à 86 °C |
 | Encore froid | bleu | liquide sous 70 °C |
 | Attention | orange | liquide au-dessus de 96 °C |
-| Alerte | rouge, **carte teintée** | liquide au-dessus de 105 °C |
+| Alerte | rouge | liquide au-dessus de 105 °C |
 
-![Alerte](screenshots/08-alerte.png)
-
-La carte entière se teinte en alerte, pour qu'un défaut se voie du coin de l'œil. C'est
-indispensable pour les valeurs basses, comme une batterie à 10,9 V, dont l'arc est trop
-court pour attirer le regard à lui seul.
+Les mêmes couleurs gardent le même sens partout : vert pour le bon, orange à surveiller,
+rouge pour agir, bleu pour une donnée neutre dans les graphiques.
 
 ---
 
@@ -35,12 +33,20 @@ court pour attirer le regard à lui seul.
 
 ### Principal
 
-Un combiné d'instruments : deux grands cadrans, **régime** (avec la vitesse dessous) et
-**turbo**, les zones orange et rouge tracées en sombre sur le cadran. Au centre, la
-**consommation instantanée** (L/100 km en roulant, L/h à l'arrêt) avec la moyenne et les
-kilomètres. En bas, **batterie**, **T° moteur** et **débitmètre** en barres. Un bandeau
-apparaît tant que le moteur n'est pas chaud.
+Deux grands cadrans à aiguille, **régime** (avec la vitesse dessous) et **turbo**, leurs
+zones orange et rouge dans le cercle. Au centre, la **consommation instantanée** sur un
+demi-cadran fin (L/100 km en roulant, L/h à l'arrêt) avec un repère sur la moyenne, la
+moyenne et les kilomètres, puis le **rapport engagé**. En bas, **batterie**,
+**température moteur** et **débitmètre** en barres fines.
 
+![Bridé par la fumée](screenshots/08-bride.png)
+
+- **Témoin « BRIDÉ »** : en haut au centre, il s'allume quand le calculateur retient le
+  gasoil, par la limite de fumée (le turbo n'a pas encore soufflé) ou par la limite de
+  couple. Le reste du temps, la place sert au bandeau de montée en température.
+- **Rapport engagé** : le calculateur n'a pas de capteur de boîte ; l'application
+  l'apprend toute seule à partir du régime et de la vitesse (boîte R380, gamme courte
+  affichée 1L, 2L…). Il apparaît après quelques minutes de route.
 - **Trajet / Total** : les petites lignes sous chaque valeur (max, moyennes, kilomètres)
   montrent le trajet en cours ou, en violet, le total conservé jusqu'à sa remise à zéro
   (appui long sur « Total »).
@@ -48,43 +54,72 @@ apparaît tant que le moteur n'est pas chaud.
   plein, complet ou partiel ; les litres affichés par la pompe servent à **caler
   automatiquement la consommation** d'un plein complet à l'autre, et à signaler les
   trajets faits sans la tablette.
+
+![Autonomie](screenshots/12-autonomie.png)
+
 - **État du débitmètre** : sous sa barre, l'écart entre le débitmètre et l'estimation du
   calculateur par le capteur de collecteur, mesuré moteur chaud, en charge et en régime
-  stable (EGR fermée). Vert, orange ou rouge, avec l'historique des 10 derniers trajets.
+  stable (EGR fermée). Vert, orange ou rouge, avec l'historique des derniers trajets.
 
 ### Injecteurs
 
 ![Injecteurs](screenshots/02-injecteurs.png)
 
-Balance des cinq injecteurs en colonnes autour de zéro, sur une bande verte de −4 à +4 :
-l'injecteur qui s'écarte saute aux yeux. L'application connaît le
-régime et la température : elle annonce **MOTEUR FROID** ou **PAS AU RALENTI** quand les
-conditions de mesure ne sont pas réunies, plutôt que de laisser lire des valeurs qui ne
-veulent rien dire.
+Balance des cinq injecteurs sur des réglettes graduées autour de zéro, avec une bande
+verte de −4 à +4 : l'injecteur qui s'écarte saute aux yeux, et le plus écarté est
+rappelé à droite. L'application connaît le régime et la température : elle annonce
+**moteur froid** ou **pas au ralenti** quand les conditions de mesure ne sont pas
+réunies, plutôt que de laisser lire des valeurs qui ne veulent rien dire.
 
 ### Expert
 
 ![Expert](screenshots/03-expert.png)
 
-Les huit valeurs de cartographie, en tuiles : le gasoil (demande, limiteurs de couple et
-de fumée, quantité injectée) sur la même échelle, l'air et le ralenti à côté. Aucune n'a
-de seuil d'alerte : la documentation d'origine est explicite, il n'y a pas de bonne ou de
-mauvaise valeur.
+À gauche, le gasoil par injection **sur une même échelle** : ta demande à la pédale, les
+limites de couple et de fumée (des repères), la quantité injectée. Un verdict dit en
+clair si le moteur est libre ou bridé, et par quoi. À droite, l'air mesuré au débitmètre
+et calculé au collecteur avec l'état du débitmètre, puis le rapport air / gasoil et
+l'écart de ralenti.
 
 ### Pédale et températures
 
 ![Pédale et températures](screenshots/04-pedale-temp.png)
 
-Les trois voies de pédale, l'enfoncement en pourcentage, la pression ambiante et les
-températures gasoil, admission et extérieure.
+L'enfoncement de la pédale et ses trois voies, avec un verdict : les trois voies doivent
+concorder, une voie qui dérive annonce une pédale qui va passer en mode dégradé. À
+droite, les températures gasoil, admission et extérieure (normale, chaude, trop chaude)
+et la pression ambiante avec l'altitude estimée.
+
+### Graphique
+
+![Graphique en direct](screenshots/10-graphique.png)
+
+**En direct** : un signal tracé sur 30 s, 2 min ou 5 min, avec son minimum, son maximum
+et sa moyenne, et un **second signal en bande dessous** pour l'expliquer (la vitesse
+sous la consommation, le régime sous le turbo…, au choix). La consommation instantanée
+est colorée : verte sous ta moyenne, orange au-dessus, rouge quand elle est forte.
+
+![Bilans](screenshots/11-bilans.png)
+
+**Bilans**, pour le trajet ou le total, chacun avec sa conclusion dans la liste :
+
+- **Conso par vitesse** : L/100 km par tranche de vitesse, la plus sobre en vert ;
+- **Conso par rapport** : L/100 km selon le rapport engagé ;
+- **Turbo par régime** : pression moyenne et maxi à pleine charge par tranche de régime,
+  comparée à une référence apprise sur les premiers relevés. Une baisse durable trahit
+  une fuite d'air ou une wastegate fatiguée ;
+- **Limiteurs** : le gasoil face aux limites de fumée et de couple, et le temps passé
+  bridé sur le trajet ;
+- **Santé par trajet** : un point par trajet pour le débitmètre, les injecteurs, le turbo
+  à 2500 tr/min et la batterie au démarrage, pour voir une usure lente.
 
 ### Tests d'actionneurs
 
 ![Tests](screenshots/05-tests.png)
 
-Quatorze commandes envoyées au calculateur : pompe à gasoil, préchauffage, voyant moteur,
-jauge de température, impulsion de régime, embrayage et ventilateur de clim, modulateurs
-EGR et turbo, et chaque injecteur isolément.
+Quatorze commandes envoyées au calculateur, rangées par famille : moteur (pompe à
+gasoil, préchauffage, impulsion de régime, modulateurs EGR et turbo), tableau de bord et
+clim, et chaque injecteur isolément.
 
 Les boutons sont **désactivés tant que le calculateur n'est pas connecté**, et chaque test
 demande une confirmation avec un avertissement adapté.
@@ -93,19 +128,21 @@ demande une confirmation avec un avertissement adapté.
 
 ![Connexion](screenshots/00-connexion.png)
 
-Identité du véhicule lue au calculateur — VIN, type d'ECU, variante de cartographie —,
-codes défaut décodés en clair, et le journal brut. L'effacement des défauts demande
-confirmation et prévient que c'est irréversible.
+Le bouton de connexion dans un anneau d'état : **blanc** une fois connecté, **rouge**
+sans signal. À droite, l'identité du véhicule lue au calculateur (VIN, type d'ECU,
+variante de cartographie), les codes défaut et le journal. L'effacement des défauts
+demande confirmation et prévient que c'est irréversible.
 
 ### Réglages
 
 ![Réglages](screenshots/06-reglages.png)
 
-Le **modèle** (Discovery 2, Defender 90, 110 ou 130), qui fixe la capacité utile du
-réservoir, puis les seuils et corrections : couleurs des jauges, **correction de vitesse**
-pour des pneus non d'origine (vitesse compteur et vitesse GPS au même moment, par exemple
-120 et 130), correction de consommation. Les valeurs d'usine des seuils viennent des
-notes publiées par l'auteur de l'application d'origine. Un bouton remet tout en place.
+Rangés par blocs : le **modèle** (Discovery 2, Defender 90, 110 ou 130), qui fixe la
+capacité utile du réservoir, puis les seuils et corrections : couleurs des jauges,
+**correction de vitesse** pour des pneus non d'origine (vitesse compteur et vitesse GPS
+au même moment, par exemple 120 et 130), correction de consommation. Les valeurs d'usine
+des seuils viennent des notes publiées par l'auteur de l'application d'origine. Un
+bouton remet tout en place.
 
 ---
 
@@ -123,7 +160,8 @@ plages attendues, et le pic de la session avec un bouton de remise à zéro.
 ![Demi-écran](screenshots/09-demi-ecran.png)
 
 L'application accepte le mode fenêtré et bascule sur une mise en page compacte sous 700
-points de large, pour tenir à côté d'un GPS.
+points de large, pour tenir à côté d'un GPS. Les pop-ups et l'onglet Graphique s'y
+adaptent aussi.
 
 ---
 
@@ -148,8 +186,11 @@ L'application s'installe **à côté** de TD5 InfoDash, avec son propre identifi
 
 ### Mode démo
 
-Un **appui long sur le bouton de connexion** simule les 26 valeurs à partir d'un cycle
-moteur cohérent : quand le régime monte, le turbo, le débit et les températures suivent.
+Un **appui long sur le bouton de connexion** simule les valeurs à partir d'un cycle
+moteur cohérent : la vitesse passe les rapports de la boîte, le régime suit, le turbo
+arrive avec un temps de retard (le moteur est alors brièvement bridé par la fumée), le
+débit et les températures suivent. Les données de la démo sont tenues à part de celles
+du véhicule.
 Utile pour montrer l'application ou travailler l'interface sans véhicule. Le mode est un
 drapeau d'exécution, désactivé par défaut, jamais compilé dans l'application.
 
@@ -175,7 +216,8 @@ version 3 de l'application d'origine, appuyé sur les libellés du projet
 limite de fumée est bien la plus basse des deux au ralenti chaud. **Confiance estimée à
 80 %**, faute de documentation constructeur.
 
-Toutes les conversions sont isolées dans une classe pure et couvertes par **41 tests
+Les conversions et les calculs (consommation, réservoir, débitmètre, rapport engagé,
+limiteurs, bilans) sont isolés dans des classes pures et couverts par **115 tests
 unitaires**.
 
 ---
@@ -218,3 +260,6 @@ Licence Apache 2.0, voir [LICENSE](LICENSE) et [NOTICE](NOTICE).
 - Le **calage automatique de la consommation** au plein et le **verdict du débitmètre**
   (seuils ±8 % et ±15 %) sont vérifiés par des tests et dans l'émulateur, pas encore
   sur plusieurs pleins réels. Les seuils du débitmètre sont réglables.
+- Le **rapport engagé** suppose une boîte manuelle R380 ; les boîtes automatiques ne
+  sont pas reconnues. Le **témoin « BRIDÉ »** et les **bilans** (1.6) sont vérifiés dans
+  l'émulateur et par des tests, pas encore sur route.
