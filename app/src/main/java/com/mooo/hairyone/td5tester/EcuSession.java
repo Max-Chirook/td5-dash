@@ -650,8 +650,16 @@ public final class EcuSession {
         double wave = (Math.sin(simulationPhase) + 1) / 2;          // 0..1
         double load = Math.pow(wave, 2);
 
-        post(DashboardEvent.DATA_TYPE.RPM, 760 + load * 3400);
-        post(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, realSpeed(load * 110));
+        // Speed follows the load; the engine speed follows the speed through
+        // the R380's gears, so the gear indicator has something to learn.
+        double speed = load * 110;
+        double[] ratios = {3.692, 2.132, 1.397, 1.000, 0.770};
+        double[] upTo = {14, 30, 50, 72, 999};
+        int g = 0;
+        while (speed > upTo[g]) g++;
+        double rpm = Math.max(760, speed * 23.5 * ratios[g] / 0.770 * (1 + 0.004 * Math.sin(simulationPhase * 7)));
+        post(DashboardEvent.DATA_TYPE.RPM, Math.min(rpm, 4300));
+        post(DashboardEvent.DATA_TYPE.VEHICLE_SPEED, realSpeed(speed));
         post(DashboardEvent.DATA_TYPE.BATTERY_VOLTAGE, 13.9 + wave * 0.7);
         // The demo starts cold and warms up, so the warm-up strip can be seen.
         double warmup = Math.min(1.0, simulationPhase / 9.0);

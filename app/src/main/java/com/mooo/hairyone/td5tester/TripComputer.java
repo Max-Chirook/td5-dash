@@ -28,6 +28,9 @@ public final class TripComputer {
     private static final String TOTALS = "totals";
     private static final String TANK = "tank";
     private static final String MAF = "maf_health";
+    private static final String GEARS = "gears";
+    private static final String BILANS = "bilans";
+    private static final String HEALTH = "health";
     private static final long SAVE_EVERY_MS = 30_000;
 
     private static TripComputer instance;
@@ -45,7 +48,27 @@ public final class TripComputer {
     private Totals total;
     private FuelTank tank;
     private MafHealth maf;
+    private GearEstimator gears;
+    private HealthLog health;
     private boolean demo;
+
+    // The bilans: fuel by speed and by gear, turbo by engine speed, and the
+    // time held back by the limiters, for the trip and for the total.
+    private final FuelBreakdown speedTrip = new FuelBreakdown(FuelBreakdown.SPEED_LABELS.length);
+    private final FuelBreakdown speedTotal = new FuelBreakdown(FuelBreakdown.SPEED_LABELS.length);
+    private final FuelBreakdown gearTrip = new FuelBreakdown(5);
+    private final FuelBreakdown gearTotal = new FuelBreakdown(5);
+    private final BoostMap boostTrip = new BoostMap();
+    private final BoostMap boostTotal = new BoostMap();
+    private final Limiters limTrip = new Limiters();
+    private final Limiters limTotal = new Limiters();
+    private Limiters.State limiter = Limiters.State.FREE;
+    private int gear = 0;
+
+    private float demand = Float.NaN;
+    private float injected = Float.NaN;
+    private float torque = Float.NaN;
+    private long tripStartMs = 0;
 
     private float rpm = Float.NaN;
     private float kmh = Float.NaN;
@@ -100,6 +123,13 @@ public final class TripComputer {
         total = Totals.fromMap(read(TOTALS, new Totals(0).toMap().keySet()), sinceMs);
         tank = FuelTank.fromMap(read(TANK, null));
         maf = MafHealth.fromMap(read(MAF, null));
+        gears = GearEstimator.fromMap(read(GEARS, null));
+        health = HealthLog.fromMap(read(HEALTH, null));
+        Map<String, Double> b = read(BILANS, null);
+        speedTotal.restore(b, "sp_");
+        gearTotal.restore(b, "ge_");
+        boostTotal.restore(b, "bo_");
+        limTotal.restore(b, "li_");
         if (since == null) save();
     }
 
@@ -107,6 +137,14 @@ public final class TripComputer {
         write(TOTALS, total.toMap(), total.sinceMs());
         write(TANK, tank.toMap(), 0);
         write(MAF, maf.toMap(), 0);
+        write(GEARS, gears.toMap(), 0);
+        write(HEALTH, health.toMap(), 0);
+        Map<String, Double> b = new HashMap<>();
+        b.putAll(speedTotal.toMap("sp_"));
+        b.putAll(gearTotal.toMap("ge_"));
+        b.putAll(boostTotal.toMap("bo_"));
+        b.putAll(limTotal.toMap("li_"));
+        write(BILANS, b, 0);
         lastSave = SystemClock.elapsedRealtime();
     }
 
@@ -120,9 +158,36 @@ public final class TripComputer {
 
     public synchronized MafHealth maf() { return maf; }
 
+    public synchronized HealthLog health() { return health; }
+
+    public synchronized GearEstimator gears() { return gears; }
+
+    /** The gear in use: 1 to 5, -1 to -5 in low range, 0 when unknown. */
+    public synchronized int gear() { return gear; }
+
+    /** Whether a limiter is holding the fuel back right now. */
+    public synchronized Limiters.State limiter() { return limiter; }
+
+    public synchronized FuelBreakdown fuelBySpeed(boolean total) { return total ? speedTotal : speedTrip; }
+
+    public synchronized FuelBreakdown fuelByGear(boolean total) { return total ? gearTotal : gearTrip; }
+
+    public synchronized BoostMap boost(boolean total) { return total ? boostTotal : boostTrip; }
+
+    /** Turbo averages compared with the long-term reference, in percent. */
+    public synchronized double boostDeviation(boolean total) {
+        return (total ? boostTotal : boostTrip).deviationFrom(boostTotal);
+    }
+
+    public synchronized Limiters limiters(boolean total) { return total ? limTotal : limTrip; }
+
     /** Starts the long-term total over from now. */
     public synchronized void resetTotal() {
         total.reset(System.currentTimeMillis());
+        speedTotal.reset();
+        gearTotal.reset();
+        boostTotal.reset();
+        limTotal.reset();
         save();
     }
 
@@ -165,11 +230,20 @@ public final class TripComputer {
             // A new connection is a new trip. The air meter's last trip, if
             // long enough, joins its history.
             maf.finishTrip();
+            health.finishTrip();
             if (Consts.DEBUG_UI != demo) {
                 save();
                 load(Consts.DEBUG_UI);
             }
             trip = new Totals(System.currentTimeMillis());
+            speedTrip.reset();
+            gearTrip.reset();
+            boostTrip.reset();
+            limTrip.reset();
+            limiter = Limiters.State.FREE;
+            gear = 0;
+            tripStartMs = SystemClock.elapsedRealtime();
+            demand = injected = torque = Float.NaN;
             rpm = kmh = ambient = manifold = coolant = mafMass = Float.NaN;
             mafPrevRpm = mafPrevBar = Double.NaN;
             save();
@@ -191,10 +265,44 @@ public final class TripComputer {
                     break;
                 case VEHICLE_SPEED:
                     kmh = v;
+                    gear = gears.update(rpm, kmh);
                     break;
                 case BATTERY_VOLTAGE:
                     trip.addBattery(v);
                     total.addBattery(v);
+                    if (SystemClock.elapsedRealtime() - tripStartMs < HealthLog.BATTERY_WINDOW_MS) health.addStartVoltage(v);
+                    break;
+                case DRIVER_DEMAND:
+                    demand = v;
+                    break;
+                case TORQUE_LIMIT:
+                    torque = v;
+                    break;
+                case SMOKE_LIMIT: {
+                    // The last word of the fuelling frame: everything is in.
+                    limiter = Limiters.stateOf(demand, injected, v, torque);
+                    float full = Settings.get(app, "pedal_full_mg");
+                    boolean floored = demand >= 0.9f * full;
+                    long now = SystemClock.elapsedRealtime();
+                    limTrip.add(limiter, floored, now);
+                    limTotal.add(limiter, floored, now);
+                    // Turbo by engine speed, at full load only.
+                    if (demand >= 0.8f * full) {
+                        double bar = Conversions.boostBar(manifold, ambient);
+                        if (!Conversions.isNoReading(bar)) {
+                            boostTrip.add(rpm, bar);
+                            boostTotal.add(rpm, bar);
+                            if (BoostMap.bandOf(rpm) == 3) health.addBoostAt2500(bar);
+                        }
+                    }
+                    break;
+                }
+                case POWER_BALANCE_1: case POWER_BALANCE_2: case POWER_BALANCE_3:
+                case POWER_BALANCE_4: case POWER_BALANCE_5:
+                    // Only warm idle gives a fair balance.
+                    if (coolant >= Settings.get(app, "warm_c") && rpm < 1000 && (Float.isNaN(kmh) || kmh < 2)) {
+                        health.addInjector(event.data_type.ordinal() - DashboardEvent.DATA_TYPE.POWER_BALANCE_1.ordinal(), v);
+                    }
                     break;
                 case COOLANT_TEMP:
                     coolant = v;
@@ -243,6 +351,13 @@ public final class TripComputer {
                     trip.addFuel(perHour, kmh, now);
                     total.addFuel(perHour, kmh, now);
                     tank.update(perHour, kmh, now);
+                    injected = v;
+                    int slot = FuelBreakdown.speedSlot(kmh);
+                    speedTrip.add(slot, perHour, kmh, now);
+                    speedTotal.add(slot, perHour, kmh, now);
+                    int g = gear > 0 ? gear - 1 : -1;
+                    gearTrip.add(g, perHour, kmh, now);
+                    gearTotal.add(g, perHour, kmh, now);
                     break;
                 }
                 default:

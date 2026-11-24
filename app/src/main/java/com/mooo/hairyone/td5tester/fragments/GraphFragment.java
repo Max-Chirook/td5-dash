@@ -16,6 +16,7 @@ import com.mooo.hairyone.td5tester.R;
 import com.mooo.hairyone.td5tester.RunningStats;
 import com.mooo.hairyone.td5tester.Settings;
 import com.mooo.hairyone.td5tester.SignalHistory;
+import com.mooo.hairyone.td5tester.TripComputer;
 import com.mooo.hairyone.td5tester.events.ConnectedEvent;
 import com.mooo.hairyone.td5tester.events.DashboardEvent;
 import com.mooo.hairyone.td5tester.views.LineChartView;
@@ -47,6 +48,10 @@ public class GraphFragment extends BaseFragment {
         SPEED("Moteur", "Vitesse", "KM/H", 0),
         COOLANT("Moteur", "T° moteur", "°C", 1),
         BATTERY("Moteur", "Batterie", "VOLT", 2),
+
+        FUEL_INSTANT("Consommation", "Instantanée", "L/100 KM", 1),
+        FUEL_FLOW("Consommation", "Débit gasoil", "L/H", 1),
+        FUEL_TRIP("Consommation", "Moyenne trajet", "L/100 KM", 1),
 
         BOOST("Air et turbo", "Turbo", "BAR", 2),
         AIR_FLOW("Air et turbo", "Débitmètre", "KG/H", 0),
@@ -102,6 +107,8 @@ public class GraphFragment extends BaseFragment {
 
     private float ambientKpa = Float.NaN;
     private float manifoldKpa = Float.NaN;
+    private float rpm = Float.NaN;
+    private float kmh = Float.NaN;
 
     private TextView tvTitle, tvValue, tvUnit;
     private TextView tvMin, tvMax, tvMean;
@@ -113,8 +120,14 @@ public class GraphFragment extends BaseFragment {
     public void onDashboardEvent(DashboardEvent event) {
         float v = (float) event.value;
         switch (event.data_type) {
-            case RPM:                   record(Sig.RPM, v); break;
-            case VEHICLE_SPEED:         record(Sig.SPEED, v); break;
+            case RPM:
+                rpm = v;
+                record(Sig.RPM, v);
+                break;
+            case VEHICLE_SPEED:
+                kmh = v;
+                record(Sig.SPEED, v);
+                break;
             case COOLANT_TEMP:          record(Sig.COOLANT, v); break;
             case BATTERY_VOLTAGE:       record(Sig.BATTERY, v); break;
             case AIR_FLOW:              record(Sig.AIR_FLOW, (float) Conversions.airFlowOrNoReading(v)); break;
@@ -136,7 +149,10 @@ public class GraphFragment extends BaseFragment {
                 record(Sig.DEMAND, v);
                 record(Sig.PEDAL, (float) Conversions.pedalPercentFromDemand(v, pedalFullMg()));
                 break;
-            case INJECTION_QUANTITY:    record(Sig.INJECTED, v); break;
+            case INJECTION_QUANTITY:
+                record(Sig.INJECTED, v);
+                recordFuel(v);
+                break;
             case TORQUE_LIMIT:          record(Sig.TORQUE, v); break;
             case SMOKE_LIMIT:           record(Sig.SMOKE, v); break;
             case MAF_AIR_MASS:          record(Sig.MAF_MASS, v); break;
@@ -159,6 +175,8 @@ public class GraphFragment extends BaseFragment {
         for (SignalHistory h : histories.values()) h.clear();
         ambientKpa = Float.NaN;
         manifoldKpa = Float.NaN;
+        rpm = Float.NaN;
+        kmh = Float.NaN;
         for (Sig s : Sig.values()) updateRow(s);
         showSelected();
     }
@@ -166,6 +184,22 @@ public class GraphFragment extends BaseFragment {
     private float pedalFullMg() {
         Context context = getContext();
         return context == null ? 50f : Settings.get(context, "pedal_full_mg");
+    }
+
+    /**
+     * Fuel economy, worked out like the main tab: the flow in L/h always, the
+     * L/100 km only when moving, and the trip average from the trip computer
+     * once the first kilometre is covered.
+     */
+    private void recordFuel(float mgPerStroke) {
+        Context context = getContext();
+        if (context == null || Float.isNaN(rpm)) return;
+        double perHour = Conversions.fuelLitresPerHour(mgPerStroke, rpm, Settings.get(context, "fuel_correction"));
+        record(Sig.FUEL_FLOW, (float) perHour);
+        double per100 = Conversions.litresPer100Km(perHour, kmh);
+        if (!Conversions.isNoReading(per100)) record(Sig.FUEL_INSTANT, (float) per100);
+        double average = TripComputer.get(context).trip().fuelAverage();
+        if (!Double.isNaN(average)) record(Sig.FUEL_TRIP, (float) average);
     }
 
     private void record(Sig sig, float value) {
