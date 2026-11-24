@@ -114,7 +114,29 @@ public class DashboardFragment extends BaseFragment {
             default:
                 return;
         }
+        scheduleFeet();
+    }
+
+    // The lines under the readings change slowly; redrawing them on every
+    // reading (a dozen a second) only costs battery, so at most twice a second.
+    private static final long FEET_EVERY_MS = 500;
+    private long feetShownAt = 0;
+    private boolean feetPending = false;
+    private final Runnable feetRunnable = () -> {
+        feetPending = false;
+        feetShownAt = android.os.SystemClock.elapsedRealtime();
         showFeet();
+    };
+
+    private void scheduleFeet() {
+        if (feetPending) return;
+        long wait = FEET_EVERY_MS - (android.os.SystemClock.elapsedRealtime() - feetShownAt);
+        if (wait <= 0) {
+            feetRunnable.run();
+        } else {
+            feetPending = true;
+            handler.postDelayed(feetRunnable, wait);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -308,6 +330,7 @@ public class DashboardFragment extends BaseFragment {
 
     @Override public void onDestroyView() {
         handler.removeCallbacksAndMessages(null);
+        feetPending = false;
         super.onDestroyView();
     }
 

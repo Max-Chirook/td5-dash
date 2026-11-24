@@ -37,7 +37,17 @@ public class LineChartView extends View {
     private final RectF card = new RectF();
 
     private final float density;
-    private final int lineColor;
+    private int lineColor;
+    private final int dim;
+
+    /** Colours each stretch of the curve by its value (fuel economy). */
+    public interface Colorizer { int colorFor(float value); }
+
+    private Colorizer colorizer = null;
+    private boolean compact = false;
+    private LinearGradient shader = null;
+    private float shaderTop = -1, shaderBottom = -1;
+    private int shaderColor = 0;
 
     private SignalHistory history;
     private int decimals = 0;
@@ -49,16 +59,17 @@ public class LineChartView extends View {
     public LineChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
         density = getResources().getDisplayMetrics().density;
-        lineColor = ContextCompat.getColor(context, R.color.stateInfo);
+        lineColor = ContextCompat.getColor(context, R.color.dataBlue);
+        dim = ContextCompat.getColor(context, R.color.dim);
 
-        cardPaint.setColor(ContextCompat.getColor(context, R.color.surface));
+        cardPaint.setColor(0);
 
-        gridPaint.setColor(ContextCompat.getColor(context, R.color.separator));
-        gridPaint.setStrokeWidth(1f * density);
+        gridPaint.setColor(0xFF1F2125);
+        gridPaint.setStrokeWidth(Math.max(1f, density));
 
-        labelPaint.setColor(ContextCompat.getColor(context, R.color.labelSecondary));
-        labelPaint.setTextSize(11f * density);
-        labelPaint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        labelPaint.setColor(dim);
+        labelPaint.setTextSize(10.5f * density);
+        labelPaint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         labelPaint.setFontFeatureSettings("tnum");
 
         linePaint.setStyle(Paint.Style.STROKE);
@@ -70,8 +81,8 @@ public class LineChartView extends View {
         fillPaint.setStyle(Paint.Style.FILL);
 
         meanPaint.setStyle(Paint.Style.STROKE);
-        meanPaint.setStrokeWidth(1.5f * density);
-        meanPaint.setColor(ContextCompat.getColor(context, R.color.labelSecondary));
+        meanPaint.setStrokeWidth(Math.max(1f, density));
+        meanPaint.setColor((ContextCompat.getColor(context, R.color.ink) & 0x00FFFFFF) | (115 << 24));
         meanPaint.setPathEffect(new DashPathEffect(new float[]{6 * density, 5 * density}, 0));
 
         dotPaint.setColor(lineColor);
@@ -80,6 +91,25 @@ public class LineChartView extends View {
     public void setSource(SignalHistory history, int decimals) {
         this.history = history;
         this.decimals = decimals;
+        invalidate();
+    }
+
+    public void setLineColor(int color) {
+        lineColor = color;
+        linePaint.setColor(color);
+        dotPaint.setColor(color);
+        invalidate();
+    }
+
+    public void setColorizer(Colorizer colorizer) {
+        this.colorizer = colorizer;
+        invalidate();
+    }
+
+    /** The small strip under the main chart: no time axis, two scale figures. */
+    public void setCompact(boolean compact) {
+        this.compact = compact;
+        linePaint.setStrokeWidth((compact ? 1.5f : 2.2f) * density);
         invalidate();
     }
 
@@ -98,14 +128,10 @@ public class LineChartView extends View {
     @Override protected void onDraw(Canvas canvas) {
         int w = getWidth();
         int h = getHeight();
-        float radius = 16f * density;
-        card.set(0, 0, w, h);
-        canvas.drawRoundRect(card, radius, radius, cardPaint);
-
-        float left = 56f * density;
-        float right = w - 16f * density;
-        float top = 16f * density;
-        float bottom = h - 28f * density;
+        float left = 40f * density;
+        float right = w - 6f * density;
+        float top = (compact ? 4f : 10f) * density;
+        float bottom = h - (compact ? 4f : 24f) * density;
         if (right <= left || bottom <= top) return;
 
         long now = SystemClock.elapsedRealtime();
@@ -123,13 +149,13 @@ public class LineChartView extends View {
             if (v > hi) hi = v;
         }
 
-        drawTimeAxis(canvas, left, right, bottom);
+        if (!compact) drawTimeAxis(canvas, left, right, bottom);
 
         if (first < 0) {
             labelPaint.setTextAlign(Paint.Align.CENTER);
-            labelPaint.setTextSize(15f * density);
-            canvas.drawText(emptyText, (left + right) / 2f, (top + bottom) / 2f, labelPaint);
-            labelPaint.setTextSize(11f * density);
+            labelPaint.setTextSize((compact ? 11f : 15f) * density);
+            canvas.drawText(compact ? "—" : emptyText, (left + right) / 2f, (top + bottom) / 2f, labelPaint);
+            labelPaint.setTextSize(10.5f * density);
             postInvalidateDelayed(1000);
             return;
         }
@@ -146,21 +172,29 @@ public class LineChartView extends View {
 
         // Horizontal grid with its labels.
         labelPaint.setTextAlign(Paint.Align.RIGHT);
-        int stepDecimals = Math.max(0, Math.min(3, (int) Math.ceil(-Math.log10(step))));
-        for (float y = yMin; y <= yMax + step * 0.01f; y += step) {
-            float py = toY(y, yMin, yMax, top, bottom);
-            canvas.drawLine(left, py, right, py, gridPaint);
-            canvas.drawText(String.format("%." + stepDecimals + "f", y),
-                    left - 8f * density, py + 4f * density, labelPaint);
+        int stepDecimals = decimalsFor(step);
+        if (compact) {
+            canvas.drawLine(left, bottom, right, bottom, gridPaint);
+            canvas.drawText(String.format("%." + stepDecimals + "f", yMax), left - 8f * density, top + 8f * density, labelPaint);
+            canvas.drawText(String.format("%." + stepDecimals + "f", yMin), left - 8f * density, bottom, labelPaint);
+        } else {
+            for (float y = yMin; y <= yMax + step * 0.01f; y += step) {
+                float py = toY(y, yMin, yMax, top, bottom);
+                canvas.drawLine(left, py, right, py, gridPaint);
+                canvas.drawText(String.format("%." + stepDecimals + "f", y),
+                        left - 10f * density, py + 4f * density, labelPaint);
+            }
         }
 
         // Session mean, when it sits inside the scale.
-        float mean = history.stats().mean();
+        float mean = compact ? Float.NaN : history.stats().mean();
         if (!Float.isNaN(mean) && mean >= yMin && mean <= yMax) {
             float py = toY(mean, yMin, yMax, top, bottom);
             canvas.drawLine(left, py, right, py, meanPaint);
             labelPaint.setTextAlign(Paint.Align.RIGHT);
-            canvas.drawText("moy.", right - 4f * density, py - 5f * density, labelPaint);
+            labelPaint.setColor(meanPaint.getColor() | 0xFF000000);
+            canvas.drawText(String.format("moy. %." + decimals + "f", mean), right - 4f * density, py - 6f * density, labelPaint);
+            labelPaint.setColor(dim);
         }
 
         line.reset();
@@ -181,11 +215,40 @@ public class LineChartView extends View {
         fill.lineTo(px, bottom);
         fill.close();
 
-        fillPaint.setShader(new LinearGradient(0, top, 0, bottom,
-                withAlpha(lineColor, 70), withAlpha(lineColor, 0), Shader.TileMode.CLAMP));
-        canvas.drawPath(fill, fillPaint);
-        canvas.drawPath(line, linePaint);
-        canvas.drawCircle(px, py, 4.5f * density, dotPaint);
+        if (colorizer != null) {
+            // Stretch by stretch, each in the colour of where it starts.
+            float qx = 0, qy = 0;
+            for (int i = first; i < n; i++) {
+                float x = left + (right - left) * (history.timeAt(i) - from) / (float) windowMs;
+                float y = toY(history.valueAt(i), yMin, yMax, top, bottom);
+                if (i > first) {
+                    linePaint.setColor(colorizer.colorFor(history.valueAt(i - 1)));
+                    canvas.drawLine(qx, qy, x, y, linePaint);
+                }
+                qx = x;
+                qy = y;
+            }
+            dotPaint.setColor(colorizer.colorFor(history.valueAt(n - 1)));
+            canvas.drawCircle(px, py, 4.5f * density, dotPaint);
+        } else {
+            if (!compact) {
+                if (shader == null || shaderTop != top || shaderBottom != bottom || shaderColor != lineColor) {
+                    shader = new LinearGradient(0, top, 0, bottom,
+                            withAlpha(lineColor, 70), withAlpha(lineColor, 0), Shader.TileMode.CLAMP);
+                    shaderTop = top;
+                    shaderBottom = bottom;
+                    shaderColor = lineColor;
+                }
+                fillPaint.setShader(shader);
+                canvas.drawPath(fill, fillPaint);
+            }
+            linePaint.setColor(lineColor);
+            canvas.drawPath(line, linePaint);
+            if (!compact) {
+                dotPaint.setColor(lineColor);
+                canvas.drawCircle(px, py, 4.5f * density, dotPaint);
+            }
+        }
 
         // Keeps the curve sliding left between readings.
         postInvalidateDelayed(250);
@@ -199,15 +262,24 @@ public class LineChartView extends View {
             long agoS = windowMs / 1000 * (ticks - i) / ticks;
             String text;
             if (agoS == 0) text = "maintenant";
-            else if (agoS % 60 == 0) text = "-" + (agoS / 60) + " min";
-            else text = "-" + agoS + " s";
+            else if (agoS % 60 == 0) text = "\u2212" + (agoS / 60) + " min";
+            else text = "\u2212" + agoS + " s";
             if (i == ticks) labelPaint.setTextAlign(Paint.Align.RIGHT);
-            canvas.drawText(text, i == ticks ? right : x, bottom + 19f * density, labelPaint);
+            canvas.drawText(text, i == ticks ? right : x, bottom + 18f * density, labelPaint);
         }
     }
 
     private static float toY(float v, float yMin, float yMax, float top, float bottom) {
         return bottom - (bottom - top) * (v - yMin) / (yMax - yMin);
+    }
+
+    /** Enough decimals to write the step exactly: 2.5 → 1, 0.25 → 2, 50 → 0. */
+    static int decimalsFor(float step) {
+        for (int d = 0; d < 4; d++) {
+            double scaled = step * Math.pow(10, d);
+            if (Math.abs(scaled - Math.round(scaled)) < 1e-4) return d;
+        }
+        return 3;
     }
 
     /** 1, 2, 2.5 or 5 times a power of ten, the closest above the raw step. */

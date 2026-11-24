@@ -4,20 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card"
-    android:orientation="vertical"
-    android:paddingStart="14dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="14dp"
-    android:paddingBottom="8dp">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/tvStatLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:letterSpacing="0.10"
+        android:letterSpacing="0.2"
         android:textColor="@color/labelSecondary"
-        android:textSize="11sp"
+        android:textSize="10sp"
         android:textStyle="bold"
         tools:text="MIN" />
 
@@ -26,12 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:maxLines="1"
-        app:autoSizeMaxTextSize="24sp"
-        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="22sp"
+        app:autoSizeMinTextSize="11sp"
         app:autoSizeTextType="uniform"
         android:fontFamily="sans-serif-light"
         android:fontFeatureSettings="tnum"
-        android:textColor="@color/label"
-        android:textSize="24sp"
+        android:textColor="@color/ink"
+        android:textSize="22sp"
         tools:text="760" />
 </LinearLayout>

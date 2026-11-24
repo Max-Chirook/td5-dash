@@ -1,157 +1,373 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Charts: live signals ("En direct") or the bilans, chosen at the top of
+     the list on the left. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="horizontal"
-    android:padding="10dp">
-
-    <!-- Every signal the app reads, with its live value; tap one to chart it. -->
-    <ScrollView
-        android:id="@+id/svSignals"
-        android:layout_width="210dp"
-        android:layout_height="match_parent"
-        android:layout_margin="5dp"
-        android:background="@drawable/card"
-        android:fadeScrollbars="false"
-        android:scrollbarSize="3dp">
-
-        <LinearLayout
-            android:id="@+id/llSignals"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp" />
-    </ScrollView>
+    android:paddingStart="12dp"
+    android:paddingEnd="18dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="206dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_margin="5dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvGraphTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.10"
-                    android:textColor="@color/labelSecondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    tools:text="RÉGIME MOTEUR" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="true"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tvGraphValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-light"
-                        android:fontFeatureSettings="tnum"
-                        android:includeFontPadding="false"
-                        android:textColor="@color/label"
-                        android:textSize="40sp"
-                        tools:text="2450" />
-
-                    <TextView
-                        android:id="@+id/tvGraphUnit"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.06"
-                        android:textColor="@color/labelSecondary"
-                        android:textSize="14sp"
-                        tools:text="TR/MIN" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llWindows"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/segmented_bg"
-                android:orientation="horizontal"
-                android:padding="3dp" />
-        </LinearLayout>
-
-        <com.mooo.hairyone.td5tester.views.LineChartView
-            android:id="@+id/chart"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
-
-            <include
-                android:id="@+id/statMin"
-                layout="@layout/graph_stat"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1" />
-
-            <include
-                android:id="@+id/statMax"
-                layout="@layout/graph_stat"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1" />
-
-            <include
-                android:id="@+id/statMean"
-                layout="@layout/graph_stat"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1" />
+            android:orientation="horizontal"
+            android:paddingStart="12dp">
 
             <TextView
-                android:id="@+id/btGraphReset"
-                android:layout_width="112dp"
-                android:layout_height="match_parent"
-                android:background="@drawable/button_card"
+                android:id="@+id/tvModeLive"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center"
-                android:maxLines="2"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:text="@string/graph_reset"
-                android:textColor="@color/colorAccent"
-                android:textSize="13sp"
+                android:letterSpacing="0.16"
+                android:text="@string/graph_live"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvModeBilans"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:gravity="center"
+                android:letterSpacing="0.16"
+                android:text="@string/graph_bilans"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/graph_stats_scope"
-            android:textColor="@color/labelTertiary"
-            android:textSize="11sp" />
+        <ScrollView
+            android:id="@+id/svSignals"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fadeScrollbars="false"
+            android:scrollbarSize="2dp">
+
+            <LinearLayout
+                android:id="@+id/llSignals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="6dp" />
+        </ScrollView>
+
+        <ScrollView
+            android:id="@+id/svBilans"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/llBilans"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="6dp" />
+        </ScrollView>
     </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="22dp"
+        android:background="@color/hairline" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <!-- Live signal -->
+        <LinearLayout
+            android:id="@+id/liveView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvGraphTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.24"
+                        android:textColor="@color/labelSecondary"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        tools:text="RÉGIME MOTEUR" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvGraphValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-thin"
+                            android:fontFeatureSettings="tnum"
+                            android:includeFontPadding="false"
+                            android:textColor="@color/ink"
+                            android:textSize="40sp"
+                            tools:text="2450" />
+
+                        <TextView
+                            android:id="@+id/tvGraphUnit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:letterSpacing="0.06"
+                            android:textColor="@color/labelSecondary"
+                            android:textSize="13sp"
+                            tools:text="tr/min" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llWindows"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:orientation="horizontal" />
+            </LinearLayout>
+
+            <com.mooo.hairyone.td5tester.views.LineChartView
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/hairline_fade" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvPartnerTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:letterSpacing="0.2"
+                    android:textColor="@color/dim"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    tools:text="VITESSE" />
+
+                <TextView
+                    android:id="@+id/tvPartnerChange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="12dp"
+                    android:text="@string/graph_change"
+                    android:textColor="@color/inkStrong"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <com.mooo.hairyone.td5tester.views.LineChartView
+                android:id="@+id/chartPartner"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/hairline_fade" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/statMin"
+                    layout="@layout/graph_stat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/statMax"
+                    layout="@layout/graph_stat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/statMean"
+                    layout="@layout/graph_stat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/btGraphReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/pill_outline"
+                    android:gravity="center"
+                    android:letterSpacing="0.08"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/graph_reset_caps"
+                    android:textColor="@color/inkStrong"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bilans -->
+        <LinearLayout
+            android:id="@+id/bilanView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvBilanTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.24"
+                        android:textColor="@color/labelSecondary"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        tools:text="CONSO PAR VITESSE" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvBilanValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-thin"
+                            android:fontFeatureSettings="tnum"
+                            android:includeFontPadding="false"
+                            android:textColor="@color/ink"
+                            android:textSize="40sp"
+                            tools:text="50–70" />
+
+                        <TextView
+                            android:id="@+id/tvBilanUnit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:letterSpacing="0.06"
+                            android:textColor="@color/labelSecondary"
+                            android:textSize="13sp"
+                            tools:text="km/h · LA PLUS SOBRE" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llBilanSeg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvBilanPill"
+                style="@style/Verdict"
+                android:layout_height="28dp"
+                android:layout_marginTop="6dp"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="6dp">
+
+                <com.mooo.hairyone.td5tester.views.BarChartView
+                    android:id="@+id/barChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.mooo.hairyone.td5tester.views.LimiterChartView
+                    android:id="@+id/limiterChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/llHealth"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/hairline_fade" />
+
+            <LinearLayout
+                android:id="@+id/llBilanStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/tvBilanNote"
+                style="@style/Hint"
+                android:layout_marginTop="4dp"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

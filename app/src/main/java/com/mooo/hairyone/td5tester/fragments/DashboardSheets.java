@@ -61,11 +61,12 @@ final class DashboardSheets {
         l.addView(v);
     }
 
-    /** A thin bar filled to fraction, the same as the strip at the foot of the cluster. */
+    /** A fine bar filled to fraction, in the style of the cluster's bars. */
     private static View bar(Context c, double fraction, int fillColor) {
         LinearLayout track = new LinearLayout(c);
         track.setBackgroundResource(R.drawable.bar_track);
-        track.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(c, 6)));
+        track.getBackground().mutate().setTint(color(c, R.color.hairline));
+        track.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(c, 8)));
         View fill = new View(c);
         fill.setBackgroundResource(R.drawable.bar_fill);
         fill.getBackground().mutate().setTint(fillColor);
@@ -81,10 +82,43 @@ final class DashboardSheets {
     private static View figure(Context c, String label, String value) {
         LinearLayout l = new LinearLayout(c);
         l.setOrientation(LinearLayout.VERTICAL);
-        l.addView(text(c, label, 12, R.color.labelSecondary));
-        l.addView(text(c, value, 17, R.color.label));
+        TextView caption = text(c, label.toUpperCase(Locale.FRANCE), 10, R.color.labelSecondary);
+        caption.setLetterSpacing(0.18f);
+        caption.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        l.addView(caption);
+        TextView figure = text(c, value, 23, R.color.ink);
+        figure.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        l.addView(figure);
         l.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         return l;
+    }
+
+    /** A separator that fades out at both ends. */
+    private static View rule(Context c) {
+        View v = new View(c);
+        v.setBackgroundResource(R.drawable.hairline_fade);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.max(1, dp(c, 1)));
+        lp.topMargin = dp(c, 14);
+        lp.bottomMargin = dp(c, 14);
+        v.setLayoutParams(lp);
+        return v;
+    }
+
+    /** "vide", "½", "plein" under the tank bar. */
+    private static View tankScale(Context c) {
+        LinearLayout row = new LinearLayout(c);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        String[] marks = {"vide", "½", "plein"};
+        int[] gravity = {Gravity.START, Gravity.CENTER_HORIZONTAL, Gravity.END};
+        for (int i = 0; i < 3; i++) {
+            TextView t = text(c, marks[i], 10.5f, R.color.dim);
+            t.setGravity(gravity[i]);
+            row.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        }
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(c, 4);
+        row.setLayoutParams(lp);
+        return row;
     }
 
     private static String litres(double l) {
@@ -97,7 +131,7 @@ final class DashboardSheets {
     static int rangeColor(Context c, double km) {
         if (km < 40) return color(c, R.color.stateAlert);
         if (km < 80) return color(c, R.color.stateHigh);
-        return color(c, R.color.label);
+        return color(c, R.color.inkStrong);
     }
 
     static void showRange(Context c, Runnable refresh) {
@@ -115,33 +149,43 @@ final class DashboardSheets {
             double km = tc.rangeKm();
             double left = tank.remaining();
             double avg = tank.averageFor(tc.total().fuelAverage());
-            TextView big = text(c, String.format(Locale.FRANCE, "%.0f km restants", km), 30, R.color.label);
-            big.setTextColor(rangeColor(c, km));
+            android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(
+                    String.format(Locale.FRANCE, "%.0f", km));
+            sb.setSpan(new android.text.style.ForegroundColorSpan(rangeColor(c, km)), 0, sb.length(), 0);
+            int start = sb.length();
+            sb.append("  km restants");
+            sb.setSpan(new android.text.style.RelativeSizeSpan(0.36f), start, sb.length(), 0);
+            sb.setSpan(new android.text.style.ForegroundColorSpan(color(c, R.color.ink)), start, sb.length(), 0);
+            TextView big = text(c, "", 54, R.color.inkStrong);
+            big.setTypeface(android.graphics.Typeface.create("sans-serif-thin", android.graphics.Typeface.NORMAL));
+            big.setText(sb);
             l.addView(big);
             l.addView(text(c, String.format(Locale.FRANCE, "%.0f L sur %.0f L, à %.1f L/100 de moyenne",
-                    left, capacity, avg), 13, R.color.labelSecondary));
-            gap(l, 10);
-            l.addView(bar(c, left / capacity, rangeColor(c, km)));
+                    left, capacity, avg), 13.5f, R.color.labelSecondary));
             gap(l, 14);
+            l.addView(bar(c, left / capacity, km < 80 ? rangeColor(c, km) : color(c, R.color.inkStrong)));
+            l.addView(tankScale(c));
+            l.addView(rule(c));
             LinearLayout row = new LinearLayout(c);
             row.addView(figure(c, "Depuis le plein", String.format(Locale.FRANCE, "%.0f km", tank.kmSinceFill())));
             row.addView(figure(c, "Consommé", litres(tank.usedSinceFill())));
             row.addView(figure(c, "Plein fait le",
                     new SimpleDateFormat("dd/MM", Locale.FRANCE).format(new Date(tank.fillMs()))));
             l.addView(row);
+            l.addView(rule(c));
         } else {
-            l.addView(text(c, c.getString(R.string.range_unknown), 14, R.color.label));
+            l.addView(text(c, c.getString(R.string.range_unknown), 14, R.color.ink));
+            gap(l, 14);
         }
-        gap(l, 14);
         // Only fuel burnt with the tablet connected is counted; say so, and
         // louder when the last fill-up showed fuel had gone unseen.
         boolean missed = tank.lastResult() == FuelTank.Check.Result.MISSED_TRIPS;
         TextView warning = text(c, c.getString(missed ? R.string.range_missed : R.string.range_only_seen),
-                12, missed ? R.color.stateHigh : R.color.labelTertiary);
+                12, missed ? R.color.stateHigh : R.color.dim);
         l.addView(warning);
         gap(l, 6);
         l.addView(text(c, Vehicle.name(c) + " · réservoir de " + Math.round(capacity)
-                + " L utiles, modifiable dans Réglages.", 12, R.color.labelTertiary));
+                + " L utiles, modifiable dans Réglages.", 12, R.color.dim));
 
         new AlertDialog.Builder(c, R.style.InfoDialog)
                 .setTitle(R.string.range_title)

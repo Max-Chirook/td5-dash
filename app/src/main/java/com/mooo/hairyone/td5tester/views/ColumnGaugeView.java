@@ -24,6 +24,7 @@ public class ColumnGaugeView extends GaugeView {
     private final Paint dashed = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
     private boolean scaleMarks = false;
+    private float dashScale = -1;
     private final int ink, inkStrong, hairline, good, grey, dim;
 
     public ColumnGaugeView(Context context) { this(context, null); }
@@ -71,7 +72,10 @@ public class ColumnGaugeView extends GaugeView {
             canvas.drawRect(0, a, w, b, paint);
             dashed.setColor((good & 0x00FFFFFF) | (90 << 24));
             dashed.setStrokeWidth(Math.max(1f, s));
-            dashed.setPathEffect(new DashPathEffect(new float[]{3 * s, 4 * s}, 0));
+            if (dashScale != s) {
+                dashed.setPathEffect(new DashPathEffect(new float[]{3 * s, 4 * s}, 0));
+                dashScale = s;
+            }
             canvas.drawLine(0, a, w, a, dashed);
             canvas.drawLine(0, b, w, b, dashed);
             if (scaleMarks) {
