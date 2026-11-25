@@ -125,7 +125,7 @@ public class SettingsFragment extends BaseFragment {
         TextView value = new TextView(requireContext());
         value.setText(name == null ? getString(R.string.vehicle_none) + "  ›" : name + "  ›");
         value.setTextSize(17f);
-        value.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        value.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         value.setTextColor(getResources().getColor(name == null ? R.color.stateHigh : R.color.ink));
         row.addView(value);
 
@@ -159,7 +159,7 @@ public class SettingsFragment extends BaseFragment {
         field.setText(format(Settings.get(requireContext(), entry.key)));
         field.setTextSize(18f);
         field.setGravity(Gravity.END);
-        field.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        field.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         field.setTextColor(getResources().getColor(R.color.ink));
         field.setBackground(null);
         field.setLayoutParams(new LinearLayout.LayoutParams((int) (86 * density),

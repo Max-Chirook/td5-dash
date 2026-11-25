@@ -79,26 +79,26 @@ public class ClusterDialView extends GaugeView {
 
         // Fine outer ring.
         stroke.setStrokeCap(Paint.Cap.BUTT);
-        stroke.setStrokeWidth(Math.max(1f, u));
+        stroke.setStrokeWidth(Math.max(1f, 1.5f * u));
         stroke.setColor(hairline);
         canvas.drawCircle(cx, cy, r + 4 * u, stroke);
 
         // Orange and red zones set into the ring.
-        stroke.setStrokeWidth(7 * u);
+        stroke.setStrokeWidth(8 * u);
         if (warnAbove > minValue && warnAbove < maxValue) {
-            stroke.setColor(withAlpha(warnColor, 140));
+            stroke.setColor(withAlpha(warnColor, 191));
             arc(canvas, cx, cy, r - 6 * u, angleOf(warnAbove), angleOf(Math.min(alertAbove, maxValue)));
         }
         if (alertAbove > minValue && alertAbove < maxValue) {
-            stroke.setColor(withAlpha(alertColor, 153));
+            stroke.setColor(withAlpha(alertColor, 204));
             arc(canvas, cx, cy, r - 6 * u, angleOf(alertAbove), START + SWEEP);
         }
 
         // The trace from zero to the reading.
         float angle = angleOf(hasValue ? shownValue : minValue);
         if (hasValue && !stale) {
-            stroke.setStrokeWidth(3 * u);
-            stroke.setColor(withAlpha(inkStrong, 230));
+            stroke.setStrokeWidth(4 * u);
+            stroke.setColor(inkStrong);
             arc(canvas, cx, cy, r - 3 * u, START, angle);
         }
 
@@ -115,7 +115,7 @@ public class ClusterDialView extends GaugeView {
                 double a = Math.toRadians(angleOf(v));
                 float outer = r - 10 * u, inner = outer - (major ? 16 : 8) * u;
                 stroke.setStrokeCap(Paint.Cap.ROUND);
-                stroke.setStrokeWidth((major ? 2.4f : 1.1f) * u);
+                stroke.setStrokeWidth((major ? 3.2f : 1.7f) * u);
                 stroke.setColor(red ? alertColor : tick);
                 canvas.drawLine(cx + (float) (inner * Math.cos(a)), cy + (float) (inner * Math.sin(a)),
                         cx + (float) (outer * Math.cos(a)), cy + (float) (outer * Math.sin(a)), stroke);
@@ -139,10 +139,10 @@ public class ClusterDialView extends GaugeView {
             float bx = cx + (float) (60 * u * Math.cos(a));
             float by = cy + (float) (60 * u * Math.sin(a));
             stroke.setStrokeCap(Paint.Cap.ROUND);
-            stroke.setStrokeWidth(9 * u);
+            stroke.setStrokeWidth(13 * u);
             stroke.setColor(withAlpha(stale ? tick : inkStrong, 46));
             canvas.drawLine(bx, by, nx, ny, stroke);
-            stroke.setStrokeWidth(3 * u);
+            stroke.setStrokeWidth(4.5f * u);
             stroke.setColor(stale ? tick : inkStrong);
             canvas.drawLine(bx, by, nx, ny, stroke);
         }
@@ -150,7 +150,7 @@ public class ClusterDialView extends GaugeView {
         // Central disc with the reading.
         fill.setColor(disc);
         canvas.drawCircle(cx, cy, 74 * u, fill);
-        stroke.setStrokeWidth(Math.max(1f, u));
+        stroke.setStrokeWidth(Math.max(1f, 1.5f * u));
         stroke.setColor(hairline);
         canvas.drawCircle(cx, cy, 74 * u, stroke);
 

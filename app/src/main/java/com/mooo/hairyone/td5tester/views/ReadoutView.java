@@ -91,11 +91,11 @@ public class ReadoutView extends GaugeView {
 
         float cy = 137f * s, r = 92f * s;
         bounds.set(cx - r, cy - r, cx + r, cy + r);
-        stroke.setStrokeWidth(5f * s);
+        stroke.setStrokeWidth(7f * s);
         stroke.setColor(hairline);
         canvas.drawArc(bounds, 180, 180, false, stroke);
         if (warnAbove > minValue && warnAbove < maxValue) {
-            stroke.setColor((warnColor & 0x00FFFFFF) | (128 << 24));
+            stroke.setColor((warnColor & 0x00FFFFFF) | (191 << 24));
             canvas.drawArc(bounds, angle(warnAbove), 360 - angle(warnAbove), false, stroke);
         }
         if (hasValue && !stale && shownValue > minValue) {
@@ -104,7 +104,7 @@ public class ReadoutView extends GaugeView {
         }
         if (!Float.isNaN(average)) {
             double a = Math.toRadians(angle(average));
-            stroke.setStrokeWidth(2.5f * s);
+            stroke.setStrokeWidth(3.5f * s);
             stroke.setColor(ink);
             float in = r - 9 * s, out = r + 9 * s;
             canvas.drawLine(cx + (float) (in * Math.cos(a)), cy + (float) (in * Math.sin(a)),

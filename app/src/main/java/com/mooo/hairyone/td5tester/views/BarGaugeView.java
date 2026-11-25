@@ -126,7 +126,7 @@ public class BarGaugeView extends GaugeView {
 
         // Bar.
         float top = (row ? 31f : 27f) * s;
-        float thick = (row ? 4f : 2f) * s;
+        float thick = (row ? 5f : 3f) * s;
         float span = right - left;
         bar.setColor(hairline);
         rect.set(left, top, right, top + thick);
@@ -190,7 +190,7 @@ public class BarGaugeView extends GaugeView {
         float a = Math.max(from, minValue);
         float b = Math.min(to, maxValue);
         if (b <= a) return;
-        bar.setColor((color & 0x00FFFFFF) | (150 << 24));
+        bar.setColor((color & 0x00FFFFFF) | (191 << 24));
         rect.set(left + span * fractionOf(a), top, left + span * fractionOf(b), top + thick);
         canvas.drawRect(rect, bar);
     }

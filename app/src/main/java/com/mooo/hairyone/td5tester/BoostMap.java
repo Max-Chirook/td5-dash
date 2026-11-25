@@ -4,18 +4,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Turbo pressure at full load, by engine speed band. The first readings in
- * each band become its reference; later averages are compared with it, so a
- * slow loss (a leak, a tired wastegate) shows as a drop in percent.
+ * Turbo pressure under firm load, by engine speed band. Each reading is the
+ * peak one acceleration reached in the band, so a pull counts once however
+ * long it lasts. The first pulls in each band become its reference; later
+ * averages are compared with it, so a slow loss (a leak, a tired wastegate)
+ * shows as a drop in percent.
  */
 public final class BoostMap {
 
     /** Band centres in rpm; each band spans ±250 rpm. */
     public static final int[] CENTRES = {1000, 1500, 2000, 2500, 3000, 3500};
-    /** Readings a band takes before its reference is set. */
-    public static final int REFERENCE_SAMPLES = 150;
-    /** Readings a band needs before its average is shown. */
-    public static final int MIN_SAMPLES = 10;
+    /** Share of the full-pedal demand from which a reading counts: a firm acceleration. */
+    public static final double LOAD_SHARE = 0.6;
+    /** Readings of one band within one pull before its peak counts. */
+    public static final int PULL_READINGS = 2;
+    /** Pulls a band takes before its reference is set. */
+    public static final int REFERENCE_SAMPLES = 8;
+    /** Pulls a band needs before its average is shown. */
+    public static final int MIN_SAMPLES = 3;
 
     private final double[] sum = new double[CENTRES.length];
     private final int[] count = new int[CENTRES.length];
@@ -24,6 +30,39 @@ public final class BoostMap {
     private final int[] refCount = new int[CENTRES.length];
 
     public BoostMap() { java.util.Arrays.fill(max, Double.NaN); }
+
+    /** The peaks of one acceleration, band by band, until the foot lifts. */
+    public static final class Pull {
+        private final double[] peak = new double[CENTRES.length];
+        private final int[] readings = new int[CENTRES.length];
+
+        public Pull() { clear(); }
+
+        public void add(double rpm, double bar) {
+            int b = bandOf(rpm);
+            if (b < 0 || Double.isNaN(bar)) return;
+            readings[b]++;
+            if (Double.isNaN(peak[b]) || bar > peak[b]) peak[b] = bar;
+        }
+
+        public boolean isEmpty() {
+            for (int r : readings) if (r > 0) return false;
+            return true;
+        }
+
+        /** The peak of each band read often enough, NaN elsewhere; the pull starts over. */
+        public double[] finish() {
+            double[] out = new double[CENTRES.length];
+            for (int b = 0; b < CENTRES.length; b++) out[b] = readings[b] >= PULL_READINGS ? peak[b] : Double.NaN;
+            clear();
+            return out;
+        }
+
+        private void clear() {
+            java.util.Arrays.fill(peak, Double.NaN);
+            java.util.Arrays.fill(readings, 0);
+        }
+    }
 
     public static int bandOf(double rpm) {
         if (Double.isNaN(rpm)) return -1;

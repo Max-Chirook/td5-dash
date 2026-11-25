@@ -32,10 +32,10 @@
     <string name="graph_mean_caps">MOYENNE</string>
     <string name="bilan_empty">Pas encore assez de route pour un bilan</string>
     <string name="bilan_learning">Rapports en cours d’apprentissage : roule quelques minutes</string>
-    <string name="bilan_turbo_empty">Mesuré à pleine charge : il faut appuyer à fond quelques fois</string>
+    <string name="bilan_turbo_empty">Il faut quelques accélérations franches, par exemple en 3e de 1500 à 3500 tr/min : 3 par tranche de régime</string>
     <string name="bilan_speed_note">Calculé à partir de 5 km/h. La ligne pointillée est ta moyenne.</string>
     <string name="bilan_gear_note">Rapports appris tout seuls à partir du régime et de la vitesse (boîte R380) ; gamme courte affichée 1L, 2L…</string>
-    <string name="bilan_turbo_note">Pression moyenne (barres) et maxi (traits) à pleine charge. Référence : tes premiers relevés. Une baisse durable trahit une fuite d’air ou une wastegate fatiguée.</string>
+    <string name="bilan_turbo_note">Chaque accélération franche (demande au-dessus de %1$d mg, pédale au plancher apprise à %2$d mg) donne le pic de pression de chaque tranche traversée. Barres : moyenne des pics ; traits : le plus haut. Référence : tes 8 premières accélérations par tranche. Une baisse durable trahit une fuite d’air ou une wastegate fatiguée.</string>
     <string name="bilan_limiter_note">L’injecté (blanc) ne dépasse jamais la plus basse des limites. Bridé par la fumée : le calculateur attend que l’air arrive.</string>
     <string name="bilan_health_note">Un point par trajet assez long ; seuils en pointillés réglables dans Réglages.</string>
     <string name="health_all_good">●  Tout est dans les normes sur les derniers trajets.</string>
@@ -130,10 +130,12 @@
     <string name="fill_pumped_unknown">Je ne sais pas</string>
     <string name="fill_done_title">Plein enregistré</string>
     <string name="maf_title">État du débitmètre</string>
-    <string name="maf_note">Mesuré seulement moteur chaud, turbo au-dessus de 0,4 bar et régime stable : la vanne EGR est alors fermée et les deux mesures d’air doivent concorder. Les accélérations et décélérations franches sont écartées, car les deux mesures n’y réagissent pas à la même vitesse. Chaque trajet donne un chiffre, les 10 derniers sont gardés. Les seuils se règlent dans Réglages, section Air et turbo.</string>
+    <string name="maf_note">Mesuré seulement moteur chaud, turbo au-dessus de 0,4 bar et régime stable : la vanne EGR est alors fermée et les deux mesures d’air doivent concorder. Les accélérations et décélérations franches sont écartées, car les deux mesures n’y réagissent pas à la même vitesse. Chaque trajet donne un chiffre, les 10 derniers sont gardés. Les seuils se règlent dans Réglages, section Air et turbo.
+
+Sur un moteur reprogrammé, le calcul du calculateur ou la plage du débitmètre ont pu être modifiés : un écart ne veut alors rien dire en lui-même. Choisis « Apprise » : les 3 premiers trajets deviennent la référence de ce véhicule et seule une dérive depuis est jugée. Remets à zéro après un changement de débitmètre ou de cartographie.</string>
     <string name="maf_reset">Remettre à zéro</string>
     <string name="maf_reset_title">Remettre l’historique à zéro ?</string>
-    <string name="maf_reset_body">À faire après le remplacement du débitmètre : les mesures des anciens trajets seront effacées.</string>
+    <string name="maf_reset_body">À faire après le remplacement du débitmètre ou une nouvelle cartographie : les mesures des anciens trajets et la référence apprise seront effacées.</string>
     <string name="sec_fuelling">GASOIL — PAR INJECTION</string>
     <string name="sec_air">AIR ADMIS</string>
     <string name="sec_pedal">PÉDALE D’ACCÉLÉRATEUR</string>

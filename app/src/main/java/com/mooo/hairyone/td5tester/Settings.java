@@ -82,7 +82,7 @@ public final class Settings {
         add("track_warn_low", PEDAL, "Voie — orange sous", "V", 0.7f);
         add("track_warn_high", PEDAL, "Voie — orange au-dessus de", "V", 4.3f);
         add("track_alert_high", PEDAL, "Voie — rouge au-dessus de", "V", 4.6f);
-        add("pedal_full_mg", PEDAL, "Pédale au plancher — demande Expert", "mg", 50);
+        add("pedal_full_mg", PEDAL, "Pédale au plancher — demande mini (plus haute apprise)", "mg", 50);
 
         // Two readings taken together, the same as a GPS check: what the
         // speedometer shows, and the true speed at that moment.

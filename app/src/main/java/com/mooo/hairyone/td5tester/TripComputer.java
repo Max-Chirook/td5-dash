@@ -32,6 +32,8 @@ public final class TripComputer {
     private static final String BILANS = "bilans";
     private static final String HEALTH = "health";
     private static final long SAVE_EVERY_MS = 30_000;
+    /** Above this a driver demand is a bad frame, not a pedal. */
+    private static final float MAX_DEMAND_MG = 120;
 
     private static TripComputer instance;
 
@@ -60,6 +62,9 @@ public final class TripComputer {
     private final FuelBreakdown gearTotal = new FuelBreakdown(5);
     private final BoostMap boostTrip = new BoostMap();
     private final BoostMap boostTotal = new BoostMap();
+    private final BoostMap.Pull pull = new BoostMap.Pull();
+    /** The highest driver demand seen with the engine running, in mg. */
+    private float learntFull = 0;
     private final Limiters limTrip = new Limiters();
     private final Limiters limTotal = new Limiters();
     private Limiters.State limiter = Limiters.State.FREE;
@@ -128,7 +133,11 @@ public final class TripComputer {
         Map<String, Double> b = read(BILANS, null);
         speedTotal.restore(b, "sp_");
         gearTotal.restore(b, "ge_");
-        boostTotal.restore(b, "bo_");
+        // "bp_" since the map counts one peak per pull; the older per-reading
+        // figures ("bo_") are left behind.
+        boostTotal.restore(b, "bp_");
+        Double lf = b.get("pedal_full");
+        learntFull = lf == null ? 0 : lf.floatValue();
         limTotal.restore(b, "li_");
         if (since == null) save();
     }
@@ -142,7 +151,8 @@ public final class TripComputer {
         Map<String, Double> b = new HashMap<>();
         b.putAll(speedTotal.toMap("sp_"));
         b.putAll(gearTotal.toMap("ge_"));
-        b.putAll(boostTotal.toMap("bo_"));
+        b.putAll(boostTotal.toMap("bp_"));
+        b.put("pedal_full", (double) learntFull);
         b.putAll(limTotal.toMap("li_"));
         write(BILANS, b, 0);
         lastSave = SystemClock.elapsedRealtime();
@@ -180,6 +190,29 @@ public final class TripComputer {
     }
 
     public synchronized Limiters limiters(boolean total) { return total ? limTotal : limTrip; }
+
+    /**
+     * The demand with the pedal on the floor: the setting, or the highest
+     * demand this vehicle has shown when higher (a remapped engine asks for
+     * more). It only grows, so a gentle trip never lowers it.
+     */
+    public synchronized float pedalFull() {
+        return Math.max(Settings.get(app, "pedal_full_mg"), learntFull);
+    }
+
+    /** The highest demand seen, 0 before any. */
+    public synchronized float learntPedalFull() { return learntFull; }
+
+    /** Forgets the learnt full-pedal demand, after a new map for instance. */
+    public synchronized void resetPedalFull() {
+        learntFull = 0;
+        save();
+    }
+
+    /** Turbo: the pulls each band still needs before its average shows. */
+    public synchronized int boostPullsMissing(boolean total, int band) {
+        return Math.max(0, BoostMap.MIN_SAMPLES - (total ? boostTotal : boostTrip).count(band));
+    }
 
     /** Starts the long-term total over from now. */
     public synchronized void resetTotal() {
@@ -239,6 +272,7 @@ public final class TripComputer {
             speedTrip.reset();
             gearTrip.reset();
             boostTrip.reset();
+            pull.finish();
             limTrip.reset();
             limiter = Limiters.State.FREE;
             gear = 0;
@@ -274,6 +308,9 @@ public final class TripComputer {
                     break;
                 case DRIVER_DEMAND:
                     demand = v;
+                    // Learnt only engine running and off idle: cranking and
+                    // a bad frame stay out.
+                    if (rpm > 1000 && v > learntFull && v <= MAX_DEMAND_MG) learntFull = v;
                     break;
                 case TORQUE_LIMIT:
                     torque = v;
@@ -281,18 +318,22 @@ public final class TripComputer {
                 case SMOKE_LIMIT: {
                     // The last word of the fuelling frame: everything is in.
                     limiter = Limiters.stateOf(demand, injected, v, torque);
-                    float full = Settings.get(app, "pedal_full_mg");
+                    float full = pedalFull();
                     boolean floored = demand >= 0.9f * full;
                     long now = SystemClock.elapsedRealtime();
                     limTrip.add(limiter, floored, now);
                     limTotal.add(limiter, floored, now);
-                    // Turbo by engine speed, at full load only.
-                    if (demand >= 0.8f * full) {
+                    // Turbo by engine speed: the peak of each firm pull.
+                    if (demand >= BoostMap.LOAD_SHARE * full) {
                         double bar = Conversions.boostBar(manifold, ambient);
-                        if (!Conversions.isNoReading(bar)) {
-                            boostTrip.add(rpm, bar);
-                            boostTotal.add(rpm, bar);
-                            if (BoostMap.bandOf(rpm) == 3) health.addBoostAt2500(bar);
+                        if (!Conversions.isNoReading(bar)) pull.add(rpm, bar);
+                    } else if (!pull.isEmpty()) {
+                        double[] peaks = pull.finish();
+                        for (int b = 0; b < peaks.length; b++) {
+                            if (Double.isNaN(peaks[b])) continue;
+                            boostTrip.add(BoostMap.CENTRES[b], peaks[b]);
+                            boostTotal.add(BoostMap.CENTRES[b], peaks[b]);
+                            if (b == 3) health.addBoostAt2500(peaks[b]);
                         }
                     }
                     break;
@@ -339,7 +380,7 @@ public final class TripComputer {
                     double bar = Conversions.boostBar(manifold, ambient);
                     boolean steady = MafHealth.isSteady(mafPrevRpm, rpm, mafPrevBar, bar);
                     if (steady && MafHealth.conditionsMet(coolant, Settings.get(app, "warm_c"), bar)) {
-                        maf.add(mafMass, v);
+                        maf.add(mafMass, v, bar);
                     }
                     mafPrevRpm = rpm;
                     mafPrevBar = bar;

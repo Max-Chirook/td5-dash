@@ -22,7 +22,7 @@ import com.mooo.hairyone.td5tester.R;
  */
 public class BarChartView extends View {
 
-    private static final Typeface LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
+    private static final Typeface LIGHT = Typeface.create("sans-serif-medium", Typeface.NORMAL);
     private static final Typeface REGULAR = Typeface.create("sans-serif", Typeface.NORMAL);
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);

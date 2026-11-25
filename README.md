@@ -12,8 +12,9 @@ s'ouvre directement sur les jauges.
 
 ## Le principe : le silence veut dire que tout va bien
 
-Le style reprend celui des écrans conducteur récents : blanc chaud sur fond presque noir,
-traits fins, zones orange et rouge discrètes sur les cadrans. Les valeurs restent
+Le style reprend celui des écrans conducteur récents : blanc pur sur fond noir, chiffres
+en graisse moyenne, traits assez épais et zones orange et rouge franches sans être
+criardes, pour rester lisible en plein soleil comme de nuit. Les valeurs restent
 **blanches** tant qu'elles sont dans leur plage normale ; la couleur n'apparaît **que**
 lorsqu'une valeur en sort. Un écran blanc veut dire que tout est correct.
 
@@ -60,6 +61,12 @@ moyenne et les kilomètres, puis le **rapport engagé**. En bas, **batterie**,
 - **État du débitmètre** : sous sa barre, l'écart entre le débitmètre et l'estimation du
   calculateur par le capteur de collecteur, mesuré moteur chaud, en charge et en régime
   stable (EGR fermée). Vert, orange ou rouge, avec l'historique des derniers trajets.
+  Sur un moteur **reprogrammé**, ce calcul ou la plage du débitmètre ont pu être modifiés :
+  la référence **Apprise** prend les 3 premiers trajets comme référence du véhicule et ne
+  juge plus que la dérive. L'écart est aussi donné par pression de turbo, pour distinguer
+  un débitmètre en bout de plage d'un débitmètre usé.
+
+![Débitmètre](screenshots/13-debitmetre.png)
 
 ### Injecteurs
 
@@ -105,8 +112,10 @@ est colorée : verte sous ta moyenne, orange au-dessus, rouge quand elle est for
 
 - **Conso par vitesse** : L/100 km par tranche de vitesse, la plus sobre en vert ;
 - **Conso par rapport** : L/100 km selon le rapport engagé ;
-- **Turbo par régime** : pression moyenne et maxi à pleine charge par tranche de régime,
-  comparée à une référence apprise sur les premiers relevés. Une baisse durable trahit
+- **Turbo par régime** : le pic de pression de chaque accélération franche, par tranche
+  de régime (3 accélérations suffisent par tranche, la progression est affichée),
+  comparé à une référence apprise sur les 8 premières. La demande « pédale au plancher »
+  s'apprend toute seule, utile sur un moteur reprogrammé. Une baisse durable trahit
   une fuite d'air ou une wastegate fatiguée ;
 - **Limiteurs** : le gasoil face aux limites de fumée et de couple, et le temps passé
   bridé sur le trajet ;
@@ -217,7 +226,7 @@ limite de fumée est bien la plus basse des deux au ralenti chaud. **Confiance e
 80 %**, faute de documentation constructeur.
 
 Les conversions et les calculs (consommation, réservoir, débitmètre, rapport engagé,
-limiteurs, bilans) sont isolés dans des classes pures et couverts par **115 tests
+limiteurs, bilans) sont isolés dans des classes pures et couverts par **120 tests
 unitaires**.
 
 ---

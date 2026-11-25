@@ -68,9 +68,9 @@ public class ColumnGaugeView extends GaugeView {
         // The ideal range, across the full width so neighbours join up.
         if (!Float.isInfinite(warnAbove) && !Float.isInfinite(warnBelow)) {
             float a = yOf(warnAbove, top, bottom), b = yOf(warnBelow, top, bottom);
-            paint.setColor((good & 0x00FFFFFF) | (18 << 24));
+            paint.setColor((good & 0x00FFFFFF) | (28 << 24));
             canvas.drawRect(0, a, w, b, paint);
-            dashed.setColor((good & 0x00FFFFFF) | (90 << 24));
+            dashed.setColor((good & 0x00FFFFFF) | (130 << 24));
             dashed.setStrokeWidth(Math.max(1f, s));
             if (dashScale != s) {
                 dashed.setPathEffect(new DashPathEffect(new float[]{3 * s, 4 * s}, 0));
@@ -94,7 +94,7 @@ public class ColumnGaugeView extends GaugeView {
         line.setColor(hairline);
         canvas.drawLine(cx, top, cx, bottom, line);
         line.setStrokeWidth(Math.max(1f, s));
-        line.setColor(0xFF3A3C40);
+        line.setColor(0xFF6E7076);
         float step = (maxValue - minValue) / 6f;
         for (int k = 0; k <= 6; k++) {
             float v = minValue + k * step;
@@ -102,7 +102,7 @@ public class ColumnGaugeView extends GaugeView {
             float y = yOf(v, top, bottom);
             canvas.drawLine(cx - 5 * s, y, cx + 5 * s, y, line);
         }
-        paint.setColor(0xFF55575C);
+        paint.setColor(0xFF8E8E93);
         canvas.drawRect(0, zy - 0.5f * s, w, zy + 0.5f * s, paint);
 
         int state = stale ? STATE_NORMAL : getState();

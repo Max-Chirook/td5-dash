@@ -190,9 +190,7 @@ public class DashboardFragment extends BaseFragment {
         showRange();
         if (gAIRFLOW instanceof BarGaugeView) {
             MafHealth.Status status = computer().maf().status(s("maf_health_warn"), s("maf_health_alert"));
-            double d = computer().maf().deviationPercent();
-            String verdict = DashboardSheets.mafVerdict(status)
-                    + (Double.isNaN(d) ? "" : " " + DashboardSheets.signedPercent(d));
+            String verdict = DashboardSheets.mafStatusText(computer().maf(), status);
             ((BarGaugeView) gAIRFLOW).setStatus(verdict, DashboardSheets.mafColor(requireContext(), status));
         }
 

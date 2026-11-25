@@ -217,7 +217,7 @@ public class GraphFragment extends BaseFragment {
             case ACC_TRACK_3:           record(Sig.TRACK3, v); break;
             case DRIVER_DEMAND:
                 record(Sig.DEMAND, v);
-                record(Sig.PEDAL, (float) Conversions.pedalPercentFromDemand(v, setting("pedal_full_mg")));
+                record(Sig.PEDAL, (float) Conversions.pedalPercentFromDemand(v, TripComputer.get(requireContext()).pedalFull()));
                 break;
             case INJECTION_QUANTITY:
                 record(Sig.INJECTED, v);
@@ -544,7 +544,7 @@ public class GraphFragment extends BaseFragment {
             TextView value = new TextView(c);
             value.setText(item[1]);
             value.setTextSize(21f);
-            value.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+            value.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
             value.setTextColor(item.length > 2 ? Integer.parseInt(item[2]) : color(R.color.ink));
             value.setSingleLine(true);
             value.setEllipsize(TextUtils.TruncateAt.END);
@@ -634,7 +634,9 @@ public class GraphFragment extends BaseFragment {
             maxes[i] = m.max(i);
             reference[i] = ref.reference(i);
             labels[i] = String.valueOf(BoostMap.CENTRES[i]);
-            subs[i] = "tr/min";
+            int missing = tc.boostPullsMissing(bilanTotal, i);
+            subs[i] = missing == 0 ? "tr/min"
+                    : String.format(Locale.FRANCE, "%d/%d accél.", BoostMap.MIN_SAMPLES - missing, BoostMap.MIN_SAMPLES);
             colors[i] = withAlpha(color(R.color.dataBlue), 200);
         }
         barChart.setDecimals(2);
@@ -642,7 +644,7 @@ public class GraphFragment extends BaseFragment {
         barChart.setData(labels, subs, values, colors);
         barChart.setMaxes(maxes);
         barChart.setReference(reference);
-        barChart.setTitle("PRESSION TURBO À PLEINE CHARGE (BAR)");
+        barChart.setTitle("PRESSION TURBO EN ACCÉLÉRATION FRANCHE (BAR)");
         double d = tc.boostDeviation(bilanTotal);
         int peak = m.peakBand();
         if (Double.isNaN(d)) {
@@ -656,8 +658,8 @@ public class GraphFragment extends BaseFragment {
         stats(new String[][]{
                 {"PRESSION MAXI À", peak < 0 ? "—" : BoostMap.CENTRES[peak] + " tr/min"},
                 {"ÉTAT", state, "" + stateColor},
-                {"RELEVÉS", String.format(Locale.FRANCE, "%,d", m.total())}});
-        tvBilanNote.setText(R.string.bilan_turbo_note);
+                {"ACCÉLÉRATIONS", String.format(Locale.FRANCE, "%,d", m.total())}});
+        tvBilanNote.setText(getString(R.string.bilan_turbo_note, Math.round(tc.pedalFull() * BoostMap.LOAD_SHARE), Math.round(tc.pedalFull())));
     }
 
     private void showLimiters() {
@@ -788,7 +790,7 @@ public class GraphFragment extends BaseFragment {
             TextView big = new TextView(c);
             big.setText(last);
             big.setTextSize(24f);
-            big.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+            big.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
             big.setTextColor(values.isEmpty() ? ink : lc == good ? good : lc);
             TextView unit = new TextView(c);
             unit.setText(units[i]);
@@ -930,7 +932,7 @@ public class GraphFragment extends BaseFragment {
             name.setTextColor(color(R.color.ink));
             TextView value = new TextView(context);
             value.setTextSize(16f);
-            value.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+            value.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
             value.setText("—");
             row.addView(name);
             row.addView(value);

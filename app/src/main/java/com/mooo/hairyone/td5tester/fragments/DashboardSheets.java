@@ -87,7 +87,7 @@ final class DashboardSheets {
         caption.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         l.addView(caption);
         TextView figure = text(c, value, 23, R.color.ink);
-        figure.setTypeface(android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL));
+        figure.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
         l.addView(figure);
         l.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         return l;
@@ -157,7 +157,7 @@ final class DashboardSheets {
             sb.setSpan(new android.text.style.RelativeSizeSpan(0.36f), start, sb.length(), 0);
             sb.setSpan(new android.text.style.ForegroundColorSpan(color(c, R.color.ink)), start, sb.length(), 0);
             TextView big = text(c, "", 54, R.color.inkStrong);
-            big.setTypeface(android.graphics.Typeface.create("sans-serif-thin", android.graphics.Typeface.NORMAL));
+            big.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL));
             big.setText(sb);
             l.addView(big);
             l.addView(text(c, String.format(Locale.FRANCE, "%.0f L sur %.0f L, à %.1f L/100 de moyenne",
@@ -326,31 +326,106 @@ final class DashboardSheets {
         return (r > 0 ? "+" : r < 0 ? "−" : "") + Math.abs(r) + " %";
     }
 
+    /** The verdict as the cluster shows it, with the learning progress when learning. */
+    static String mafStatusText(MafHealth maf, MafHealth.Status status) {
+        double d = maf.deviationPercent();
+        if (status == MafHealth.Status.MEASURING && maf.isLearnt() && maf.referenceTrips() < MafHealth.REFERENCE_TRIPS) {
+            return "apprentissage " + maf.referenceTrips() + "/" + MafHealth.REFERENCE_TRIPS;
+        }
+        return mafVerdict(status) + (Double.isNaN(d) ? "" : " " + signedPercent(d));
+    }
+
+    /** One choice of a two-way switch, underlined when on. */
+    private static TextView choice(Context c, String label, boolean on, View.OnClickListener click) {
+        TextView t = text(c, label, 13, on ? R.color.label : R.color.labelSecondary);
+        t.setAllCaps(true);
+        t.setLetterSpacing(0.12f);
+        t.setTypeface(null, android.graphics.Typeface.BOLD);
+        t.setPadding(dp(c, 4), dp(c, 6), dp(c, 4), dp(c, 6));
+        if (on) t.setBackgroundResource(R.drawable.underline_on);
+        t.setOnClickListener(click);
+        return t;
+    }
+
     static void showMaf(Context c) {
-        MafHealth maf = TripComputer.get(c).maf();
+        TripComputer tc = TripComputer.get(c);
+        MafHealth maf = tc.maf();
         float warn = Settings.get(c, "maf_health_warn");
         float alert = Settings.get(c, "maf_health_alert");
-        MafHealth.Status status = maf.status(warn, alert);
-        double d = maf.deviationPercent();
+        MafHealth.Status status;
+        double d, raw, ref;
+        synchronized (tc) {
+            status = maf.status(warn, alert);
+            d = maf.deviationPercent();
+            raw = maf.rawPercent();
+            ref = maf.reference();
+        }
+        final AlertDialog[] dialog = new AlertDialog[1];
 
         LinearLayout l = column(c);
-        String verdict = mafVerdict(status);
-        TextView big = text(c, Character.toUpperCase(verdict.charAt(0)) + verdict.substring(1)
-                + (Double.isNaN(d) ? "" : "   " + signedPercent(d)), 26, R.color.label);
+        // How it is judged: against the ECU's estimate, or this vehicle's own.
+        LinearLayout sw = new LinearLayout(c);
+        sw.setOrientation(LinearLayout.HORIZONTAL);
+        sw.setGravity(Gravity.CENTER_VERTICAL);
+        sw.addView(text(c, "RÉFÉRENCE", 11, R.color.labelTertiary));
+        View.OnClickListener origin = v -> { setMafLearnt(tc, false); dialog[0].dismiss(); showMaf(c); };
+        View.OnClickListener learnt = v -> { setMafLearnt(tc, true); dialog[0].dismiss(); showMaf(c); };
+        TextView o = choice(c, "Origine", !maf.isLearnt(), origin);
+        TextView a = choice(c, "Apprise", maf.isLearnt(), learnt);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMarginStart(dp(c, 16));
+        sw.addView(o, lp);
+        sw.addView(a, lp);
+        l.addView(sw);
+        l.addView(text(c, maf.isLearnt()
+                ? "Moteur reprogrammé : seule la dérive depuis les premiers trajets est jugée."
+                : "Moteur d’origine : l’écart avec le calcul du calculateur est jugé tel quel.", 12, R.color.labelTertiary));
+        gap(l, 10);
+
+        String verdict = mafStatusText(maf, status);
+        TextView big = text(c, Character.toUpperCase(verdict.charAt(0)) + verdict.substring(1), 26, R.color.label);
         big.setTextColor(mafColor(c, status));
         l.addView(big);
-        if (Double.isNaN(d)) {
+        if (Double.isNaN(raw)) {
             l.addView(text(c, String.format(Locale.FRANCE,
                     "Pas encore assez de mesures : %d sur %d pour ce trajet.",
                     maf.tripSamples(), MafHealth.MIN_SAMPLES), 13, R.color.labelSecondary));
         } else {
             l.addView(text(c, String.format(Locale.FRANCE,
                     "Le débitmètre mesure %d %% d'air %s que le calcul par le capteur du collecteur.",
-                    Math.abs(Math.round(d)), d < 0 ? "en moins" : "en plus"), 13, R.color.labelSecondary));
+                    Math.abs(Math.round(raw)), raw < 0 ? "en moins" : "en plus"), 13, R.color.labelSecondary));
+            if (maf.isLearnt()) {
+                l.addView(text(c, Double.isNaN(ref)
+                        ? String.format(Locale.FRANCE, "Référence de ce véhicule en cours : %d trajet(s) sur %d.",
+                                maf.referenceTrips(), MafHealth.REFERENCE_TRIPS)
+                        : String.format(Locale.FRANCE, "Écart propre à ce véhicule : %s. Dérive depuis : %s.",
+                                signedPercent(ref), signedPercent(d)), 13, R.color.labelSecondary));
+            }
+        }
+
+        // The gap by turbo pressure, and what its shape says.
+        gap(l, 10);
+        l.addView(text(c, "ÉCART PAR PRESSION DE TURBO", 11, R.color.labelTertiary));
+        for (int b = 0; b < MafHealth.BAND_EDGES.length; b++) {
+            double p = maf.bandPercent(b);
+            l.addView(text(c, MafHealth.BAND_LABELS[b] + "   " + (Double.isNaN(p) ? "—" : signedPercent(p)), 13, R.color.label));
+        }
+        double spread = maf.bandSpread();
+        if (!Double.isNaN(spread)) {
+            String hint;
+            if (Math.abs(spread) >= 8) {
+                hint = "L’écart change avec la pression : signe d’un débitmètre en bout de plage ou d’une cartographie modifiée, plutôt que d’une usure.";
+            } else if (!Double.isNaN(raw) && Math.abs(raw) > alert) {
+                hint = "L’écart est le même à toutes les pressions : étalonnage changé (cartographie, filtre ou admission modifiés) ou débitmètre usé.";
+            } else {
+                hint = "L’écart est le même à toutes les pressions.";
+            }
+            l.addView(text(c, hint, 12, R.color.labelSecondary));
         }
         gap(l, 10);
         MafChartView chart = new MafChartView(c);
         chart.set(d, maf.trips(), warn, alert);
+        if (maf.isLearnt()) l.addView(text(c, "Le graphique montre la dérive depuis la référence.", 11, R.color.labelTertiary));
         l.addView(chart);
         l.addView(text(c, "Dernier point à droite : trajet le plus récent.", 11, R.color.labelTertiary));
         gap(l, 12);
@@ -360,7 +435,7 @@ final class DashboardSheets {
 
         ScrollView scroll = new ScrollView(c);
         scroll.addView(l);
-        new AlertDialog.Builder(c, R.style.InfoDialog)
+        dialog[0] = new AlertDialog.Builder(c, R.style.InfoDialog)
                 .setTitle(R.string.maf_title)
                 .setView(scroll)
                 .setPositiveButton(R.string.close, null)
@@ -369,7 +444,6 @@ final class DashboardSheets {
                         .setMessage(R.string.maf_reset_body)
                         .setNegativeButton(R.string.cancel, null)
                         .setPositiveButton(R.string.maf_reset, (d2, w2) -> {
-                            TripComputer tc = TripComputer.get(c);
                             synchronized (tc) {
                                 tc.maf().reset();
                                 tc.save();
@@ -377,5 +451,12 @@ final class DashboardSheets {
                         })
                         .show())
                 .show();
+    }
+
+    private static void setMafLearnt(TripComputer tc, boolean learnt) {
+        synchronized (tc) {
+            tc.maf().setLearnt(learnt);
+            tc.save();
+        }
     }
 }

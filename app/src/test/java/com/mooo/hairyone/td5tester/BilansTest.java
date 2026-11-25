@@ -150,6 +150,24 @@ public class BilansTest {
         assertEquals(1.0, back.reference(3), 1e-9);
     }
 
+    @Test public void onePeakPerPull() {
+        BoostMap.Pull p = new BoostMap.Pull();
+        assertTrue(p.isEmpty());
+        p.add(1980, 0.70);
+        p.add(2050, 1.05);
+        p.add(2120, 0.98);
+        p.add(2480, 1.20);                           // a single reading: too short to count
+        double[] peaks = p.finish();
+        assertEquals(1.05, peaks[2], 1e-9);
+        assertTrue(Double.isNaN(peaks[3]));
+        assertTrue(p.isEmpty());
+        BoostMap m = new BoostMap();
+        for (int i = 0; i < BoostMap.MIN_SAMPLES - 1; i++) m.add(2000, 1.0);
+        assertTrue(Double.isNaN(m.average(2)));
+        m.add(2000, 1.0);
+        assertEquals(1.0, m.average(2), 1e-9);
+    }
+
     // ---- Health per trip ----
 
     @Test public void healthPerTrip() {

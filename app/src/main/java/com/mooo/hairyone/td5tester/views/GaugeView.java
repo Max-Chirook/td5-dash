@@ -24,7 +24,7 @@ import com.mooo.hairyone.td5tester.R;
 public class GaugeView extends View {
 
     // Typefaces are created once, not on every frame.
-    protected static final Typeface TF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
+    protected static final Typeface TF_LIGHT = Typeface.create("sans-serif-medium", Typeface.NORMAL);   // figures: thin strokes vanish in sunlight
     protected static final Typeface TF_REGULAR = Typeface.create("sans-serif", Typeface.NORMAL);
     protected static final Typeface TF_MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
     protected static final Typeface TF_BOLD = Typeface.create("sans-serif-medium", Typeface.BOLD);
@@ -123,7 +123,7 @@ public class GaugeView extends View {
         glowPaint.setStrokeCap(Paint.Cap.ROUND);
 
         valuePaint.setTextAlign(Paint.Align.CENTER);
-        valuePaint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        valuePaint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         // Tabular figures, so digits keep their column and the number stops jittering.
         valuePaint.setFontFeatureSettings("tnum");
 

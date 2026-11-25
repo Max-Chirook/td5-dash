@@ -5,6 +5,7 @@ import android.view.View;
 import com.mooo.hairyone.td5tester.Conversions;
 import com.mooo.hairyone.td5tester.Log4jHelper;
 import com.mooo.hairyone.td5tester.R;
+import com.mooo.hairyone.td5tester.TripComputer;
 import com.mooo.hairyone.td5tester.Settings;
 import com.mooo.hairyone.td5tester.events.DashboardEvent;
 import com.mooo.hairyone.td5tester.views.GaugeInfoSheet;
@@ -35,7 +36,7 @@ public class TemperatureAndPressureFragment extends BaseFragment {
             // The supply channel holds still on the vehicle; the driver demand
             // from the fuelling frame is what follows the pedal.
             case DRIVER_DEMAND: {
-                double percent = Conversions.pedalPercentFromDemand(value, s("pedal_full_mg"));
+                double percent = Conversions.pedalPercentFromDemand(value, TripComputer.get(requireContext()).pedalFull());
                 if (!Conversions.isNoReading(percent)) gACC_SUPPLY.setValue((float) percent);
                 break;
             }
